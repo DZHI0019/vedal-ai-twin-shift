@@ -2,6 +2,13 @@ Unicode True
 RequestExecutionLevel user
 ManifestDPIAware true
 Name "Twin Shift · Vedal AI"
+VIProductVersion "${NUMERIC_VERSION}"
+VIAddVersionKey "ProductName" "Vedal AI · Twin Shift"
+VIAddVersionKey "CompanyName" "Twin Shift contributors"
+VIAddVersionKey "FileDescription" "Vedal AI · Twin Shift Setup"
+VIAddVersionKey "FileVersion" "${RELEASE_VERSION}"
+VIAddVersionKey "ProductVersion" "${RELEASE_VERSION}"
+VIAddVersionKey "LegalCopyright" "Twin Shift contributors"
 OutFile "${OUTPUT}\TwinShift-${RELEASE_VERSION}-Setup.exe"
 !ifdef SIGN_PWSH
   !uninstfinalize '"${SIGN_PWSH}" -NoLogo -NoProfile -NonInteractive -File "${SIGN_SCRIPT}" -Mode Sign -Path "%1"' = 0
