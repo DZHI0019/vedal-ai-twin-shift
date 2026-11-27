@@ -62,14 +62,16 @@ namespace TwinShift
                 "本轮已中断"
             }
         };
-        public MainWindow()
+        public MainWindow() : this(null) { }
+
+        internal MainWindow(Process badgeTarget)
         {
             InitializeComponent();
             prefs = Preferences.Load(out string warning);
             backupInvalid = warning.Length > 0;
             deck = new AudioDeck(prefs);
             deck.Notice += Say;
-            badge = new BadgeWindow(prefs, () => Manual("tutel"), () =>
+            badge = new BadgeWindow(prefs, badgeTarget, () => Manual("tutel"), () =>
             {
                 Reveal();
                 Page(2);
@@ -425,6 +427,14 @@ namespace TwinShift
         void OpenCredits(object s, RoutedEventArgs e) => Guard(() => OpenFile(new Uri(Path.Combine(Files.Base, "使用手册.html")).AbsoluteUri + "#credits"));
         void OpenWallpaperRelease(object s, RoutedEventArgs e) => Guard(() => OpenFile("https://github.com/Fei-Away/Codex-Dream-Skin/releases/tag/v1.5.21"));
         void ShowScenes(object s, RoutedEventArgs e) => Guard(() => OpenFile(Path.Combine(Files.Base, "scenes")));
+        void EnableWallpaperHeader(object s, RoutedEventArgs e) => SetWallpaperHeader(true);
+        void RestoreWallpaperHeader(object s, RoutedEventArgs e) => SetWallpaperHeader(false);
+        void SetWallpaperHeader(bool enable) => Guard(() =>
+        {
+            string engine = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "CodexDreamSkin", "engine");
+            bool changed = WallpaperHeader.Change(engine, enable);
+            Say(changed ? "已更新标题栏资源。请在壁纸宿主中重新应用主题。" : "标题栏已是所选状态。");
+        });
         void CopyTheme(object s, RoutedEventArgs e) => Guard(() =>
         {
             string key = (string)((Button)s).Tag;

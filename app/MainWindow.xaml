@@ -70,6 +70,8 @@
       <Border Style="{StaticResource Panel}"><StackPanel><TextBlock FontWeight="SemiBold" Text="安装和恢复背景"/>
        <TextBlock Style="{StaticResource Hint}" Text="在 Dream Skin 的 Import Theme ZIP 分别导入两个包，在 Saved Themes 选择班次。恢复时先保存工作，再使用宿主的 Restore，完全退出后从官方入口重开 Codex。此宿主使用本机调试连接。"/>
        <WrapPanel><Button Click="ShowScenes" Content="打开壁纸包目录"/><Button Click="OpenWallpaperRelease" Content="壁纸宿主官方发布页"/><Button Click="OpenGuide" Content="使用手册"/></WrapPanel>
+       <TextBlock Style="{StaticResource Hint}" Text="Dream Skin 1.5.21 可启用新版 Codex 标题栏着色。只更新壁纸宿主的三份界面资源，重新应用主题后生效。"/>
+       <WrapPanel><Button Click="EnableWallpaperHeader" Content="适配新版标题栏"/><Button Click="RestoreWallpaperHeader" Content="还原宿主标题栏"/></WrapPanel>
       </StackPanel></Border>
       <Border Style="{StaticResource Panel}"><StackPanel><TextBlock FontWeight="SemiBold" Text="隐私与许可"/>
        <TextBlock Style="{StaticResource Hint}" Text="无遥测。本机事件通道只传状态和短标识。角色录音的公开再分发须另行取得许可；可为每句导入有权使用的 WAV。"/>

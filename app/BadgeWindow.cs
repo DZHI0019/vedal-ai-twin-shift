@@ -45,13 +45,16 @@ namespace TwinShift
             Interval = TimeSpan.FromSeconds(3)
         };
         readonly Preferences prefs;
+        readonly Process target;
         readonly Border frame;
         readonly Glyph chip;
         IntPtr cachedHandle;
+        uint cachedPid;
         bool eligible;
-        internal BadgeWindow(Preferences prefs, Action click, Action panel)
+        internal BadgeWindow(Preferences prefs, Process target, Action click, Action panel)
         {
             this.prefs = prefs;
+            this.target = target;
             WindowStyle = WindowStyle.None;
             ResizeMode = ResizeMode.NoResize;
             ShowInTaskbar = false;
@@ -135,14 +138,20 @@ namespace TwinShift
             try
             {
                 IntPtr main = GetForegroundWindow();
-                if (main != cachedHandle)
+                GetWindowThreadProcessId(main, out uint pid);
+                if (target != null && (pid != target.Id || target.HasExited))
+                {
+                    Hide();
+                    return;
+                }
+                if (main != cachedHandle || pid != cachedPid)
                 {
                     cachedHandle = main;
+                    cachedPid = pid;
                     eligible = false;
                     var cls = new StringBuilder(100);
                     if (main != IntPtr.Zero && GetClassName(main, cls, 100) > 0 && cls.ToString() == "Chrome_WidgetWin_1")
                     {
-                        GetWindowThreadProcessId(main, out uint pid);
                         using (var p = Process.GetProcessById((int)pid))
                             eligible = CodexDesktop.Matches(p);
                     }
