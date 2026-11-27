@@ -38,7 +38,7 @@ namespace TwinShift
             Dispatcher.PushFrame(frame);
         }
 
-        static void Hook(string name, string tool, string command, string result, string id)
+        static void Hook(string name, string tool, string command, string result, string id, bool includeBom = false)
         {
             var data = new
             {
@@ -68,8 +68,16 @@ namespace TwinShift
             using (var p = Process.Start(start))
             {
                 byte[] input = System.Text.Encoding.UTF8.GetBytes(new JavaScriptSerializer().Serialize(data));
-                p.StandardInput.BaseStream.Write(input, 0, input.Length);
-                p.StandardInput.Close();
+                using (Stream stream = p.StandardInput.BaseStream)
+                {
+                    // .NET Framework may have already emitted the console encoding's preamble.
+                    if (includeBom && p.StandardInput.Encoding.GetPreamble().Length == 0)
+                    {
+                        byte[] preamble = System.Text.Encoding.UTF8.GetPreamble();
+                        stream.Write(preamble, 0, preamble.Length);
+                    }
+                    stream.Write(input, 0, input.Length);
+                }
                 Require(p.WaitForExit(3000) && p.ExitCode == 0 && p.StandardOutput.ReadToEnd() == "" && p.StandardError.ReadToEnd() == "", "A hook affected the conversation");
             }
 
@@ -137,7 +145,7 @@ namespace TwinShift
                 Shot(win, args[0], "neo");
                 var title = (TextBlock)win.FindName("LastTitle");
                 var history = (StackPanel)win.FindName("History");
-                Hook("PermissionRequest", "Bash", "sensitive text", "", "approval");
+                Hook("PermissionRequest", "Bash", "sensitive text", "", "approval", includeBom: true);
                 Require(title.Text.Contains("审批"), "Permission");
                 Hook("PermissionRequest", "Bash", "sensitive text", "", "approval");
                 Require(history.Children.Count == 1, "Duplicate event");
