@@ -11,8 +11,15 @@ namespace TwinShift
 {
     internal static class SignalBus
     {
-        public static readonly string Root = Path.GetFullPath(Environment.GetEnvironmentVariable("TWINSHIFT_DATA_DIR") ?? Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TwinShift", "Data"));
+        public static readonly string Root = ResolveDataDirectory(Environment.GetEnvironmentVariable("TWINSHIFT_DATA_DIR"));
         public static string EndpointFile => Path.Combine(Root, "receiver.txt");
+
+        internal static string ResolveDataDirectory(string configured)
+        {
+            if (string.IsNullOrWhiteSpace(configured))
+                configured = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TwinShift", "Data");
+            return Path.GetFullPath(configured);
+        }
 
         public static bool ValidPipe(string name) => Regex.IsMatch(name ?? "", @"\Atwinshift-[a-f0-9]{32}\z");
         static readonly string[] Kinds =
