@@ -11,7 +11,20 @@ jobs:
         shell: pwsh
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Check out the pinned wallpaper host used by compatibility tests
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          repository: Fei-Away/Codex-Dream-Skin
+          ref: 6fc42df48a6a5365011f55cc349e20c038e56d1d
+          path: .upstream
+          persist-credentials: false
       - name: Build desktop app, event plugin, and wallpaper packages
         run: ./tools/build.ps1
       - name: Run isolated desktop, transport and palette checks
-        run: ./tools/test.ps1
+        run: ./tools/test.ps1 -WallpaperEngine .upstream/windows
+      - name: Check Windows signature verification
+        run: |
+          $sdk = Get-ChildItem "${env:ProgramFiles(x86)}/Windows Kits/10/bin/*/x64/signtool.exe" | Sort-Object FullName -Descending | Select-Object -First 1
+          ./tests/signatures.ps1 -SignTool $sdk.FullName -UnsignedBinary ./out/app/TwinShift.exe
