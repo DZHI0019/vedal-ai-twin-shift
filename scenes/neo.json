@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1, "id": "twin-shift.neo", "name": "Vedal AI · Neo",
+  "brandSubtitle": "非官方同人主题", "tagline": "Neuro · Day Shift",
+  "image": "background.jpg", "appearance": "light",
+  "art": {"focusX": 0.73, "focusY": 0.49, "safeArea": "left", "taskMode": "ambient"},
+  "colors": {
+    "background":"#F9F4EC","panel":"#FFFCF7","panelAlt":"#F2EAE0","accent":"#45634F",
+    "accentAlt":"#594C3D","secondary":"#476354","highlight":"#DEE6D9",
+    "text":"#2B3932","muted":"#565F56","line":"#D6CABC"
+  }
+}
