@@ -1,5 +1,7 @@
 # 作品与署名
 
+标题栏兼容功能沿用 Codex Dream Skin Studio contributors 的部件选择器，原项目 MIT 许可证见同目录的 DREAM-SKIN-LICENSE.txt。对应的上游版本为 v1.5.21。[上游源码](https://github.com/Fei-Away/Codex-Dream-Skin/tree/6fc42df48a6a5365011f55cc349e20c038e56d1d)
+
 Twin Shift 是 Neuro-sama、Evil Neuro 与 Vedal 的非官方同人项目。软件代码与原创界面图标采用仓库 MIT 许可。名称、虚拟形象及商标由各自权利人拥有。[Vedal AI](https://vedal.ai/)
 
 * `tutel.png` 为 amissmystic《Neuros of Chase》的乌龟像素图，固定版本 6ddc94f9835869e1c6c3f42213e6c74f57e9589d。`twinshift.ico` 是这张图的缩放转换。保留作者的 MIT No Attribution 许可于 TUTEL-LICENSE.md。[原图](https://github.com/amissmystic/neuros-of-chase/blob/6ddc94f9835869e1c6c3f42213e6c74f57e9589d/items/tutel.png) · [作者的作品页](https://amissmystic.itch.io/neuros-of-chase)
