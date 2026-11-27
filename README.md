@@ -1,6 +1,6 @@
 # Vedal AI · Twin Shift
 
-**公开 Beta · v1.1.0-beta.1**　[下载 Windows 安装包和 SHA-256 清单](https://github.com/DZHI0019/vedal-ai-twin-shift/releases/tag/v1.1.0-beta.1)
+**当前公开安装包为 v1.1.0-beta.1。** 本分支包含 beta.2 候选修复。[公开版本和 SHA-256 清单](https://github.com/DZHI0019/vedal-ai-twin-shift/releases)
 
 给 Windows 版 Codex 的 Neuro-sama、Evil Neuro 和 Vedal 同人主题。Neo 白班用暖纸色、IBM 5100 和电台小灯；Evo 夜班用近黑灰阶、地下室管道和碎心。代码仍有清晰的增删标记。Vedal AI 是主题署名，模型名称和权限审批由 Codex 显示。
 
@@ -24,7 +24,9 @@
 
 ### Beta 兼容情况
 
-Windows Codex 26.1120.6357.0 的两套项目首页已在独立配置中实拍。Dream Skin 1.5.21 能绘制壁纸和输入框，其标题栏着色检查在该版本仍提示缺少匹配项。小龟已适配新版 Windows 应用包；它与审批卡、代码 diff 在同一窗口中同时可见的效果仍待实机验收。安装程序尚未签署 Authenticode，可在发布页核对 SHA-256。
+在 Windows Codex 26.1120.6357.0 上，beta.2 可通过「接入 → 适配新版标题栏」为 Dream Skin 1.5.21 启用菜单与标题栏着色。从 beta.1 升级时请重新导入安装包里的两份壁纸 ZIP，再从 Saved Themes 选择。「还原宿主标题栏」可恢复上游原文件。Neo 和 Evo 的独立测试首页均通过宿主的必需部件检查，输入框完整可见。
+
+小龟可绑定一个专用 Codex 实例。真实审批、代码 diff、任务完成和窗边小龟的同屏验收仍在进行。公开 beta.1 使用未签名安装程序。候选版的签名构建与验签方法见维护手册。
 
 ## 构建
 
@@ -34,7 +36,7 @@ Windows Codex 26.1120.6357.0 的两套项目首页已在独立配置中实拍。
 ./tools/build.ps1
 ./tools/test.ps1
 ./tools/build.ps1 -MakeNSIS 'C:\Program Files (x86)\NSIS\makensis.exe'
-./tests/installer.ps1 -Installer './out/TwinShift-1.1.0-beta.1-Setup.exe'
+./tests/installer.ps1 -Installer './out/TwinShift-1.1.0-beta.2-Setup.exe'
 ```
 
 编译产物在 `out/`。主题源、素材署名、版本兼容和复验步骤见[维护手册](docs/MAINTAINING.md)。欢迎提交可复现的问题，附 Codex、Windows、主题版本和操作步骤即可。发截图前请遮盖项目名、聊天内容和个人路径。
