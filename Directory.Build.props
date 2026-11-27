@@ -5,7 +5,7 @@
     <Deterministic>true</Deterministic>
     <PathMap>$(MSBuildThisFileDirectory)=/_/</PathMap>
     <DebugType>none</DebugType>
-    <Version>1.1.0-beta.4</Version>
+    <Version>1.1.0-beta.5</Version>
     <Company>Twin Shift contributors</Company>
     <Product>Twin Shift</Product>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>

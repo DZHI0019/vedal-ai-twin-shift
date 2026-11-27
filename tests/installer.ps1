@@ -37,7 +37,12 @@ try {
         if(!(Test-Path (Join-Path $target $file))){throw "Missing payload $file"}
     }
     $voices = Join-Path $target 'assets/voices'
-    $cues = @(Get-Content -Raw -Encoding utf8 -LiteralPath (Join-Path $target 'assets/voices.json') | ConvertFrom-Json)
+    $sourceCatalog = Join-Path $PSScriptRoot '../assets/voices.json'
+    $installedCatalog = Join-Path $target 'assets/voices.json'
+    if ((Get-FileHash -LiteralPath $installedCatalog).Hash -ne (Get-FileHash -LiteralPath $sourceCatalog).Hash) {
+        throw 'Installed voice catalogue differs from the source release'
+    }
+    $cues = @(Get-Content -Raw -Encoding utf8 -LiteralPath $sourceCatalog | ConvertFrom-Json)
     if ($cues.Count -ne 8 -or @(Get-ChildItem -File -LiteralPath $voices).Count -ne 8) { throw 'Incomplete offline voice pack' }
     foreach ($cue in $cues) {
         if ((Get-FileHash -LiteralPath (Join-Path $voices ($cue.Id + '.mp3'))).Hash -ne $cue.Sha256) { throw 'Installed voice checksum mismatch' }
