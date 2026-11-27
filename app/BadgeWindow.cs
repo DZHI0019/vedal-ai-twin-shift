@@ -7,7 +7,6 @@ using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace TwinShift
@@ -67,7 +66,7 @@ namespace TwinShift
             {
                 Width = 28,
                 Height = 28,
-                Source = new BitmapImage(new Uri(Files.Asset("tutel.png")))
+                Source = Files.Image("tutel.png")
             };
             RenderOptions.SetBitmapScalingMode(image, BitmapScalingMode.NearestNeighbor);
             var strip = new StackPanel

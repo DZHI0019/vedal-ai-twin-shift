@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web.Script.Serialization;
+using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 
 namespace TwinShift
@@ -12,6 +13,19 @@ namespace TwinShift
     {
         public static readonly string Base = AppDomain.CurrentDomain.BaseDirectory;
         public static string Asset(string file) => Path.Combine(Base, "assets", file);
+        public static BitmapImage Image(string file)
+        {
+            using (var source = File.OpenRead(Asset(file)))
+            {
+                var image = new BitmapImage();
+                image.BeginInit();
+                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.StreamSource = source;
+                image.EndInit();
+                image.Freeze();
+                return image;
+            }
+        }
         public static T ReadJson<T>(string file, int maxBytes)
         {
             using (var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete))

@@ -1,20 +1,26 @@
 <Window x:Class="TwinShift.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
- xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:t="clr-namespace:TwinShift"
+ xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:t="clr-namespace:TwinShift" xmlns:ui="http://schemas.lepo.co/wpfui/2022/xaml"
  Title="Vedal AI · Twin Shift" Width="888" Height="690" MinWidth="610" MinHeight="440" WindowStartupLocation="CenterScreen"
- Background="{DynamicResource Paper}" Foreground="{DynamicResource Ink}" FontFamily="Segoe UI, Microsoft YaHei UI" FontSize="14" UseLayoutRounding="True">
+ Background="{DynamicResource Paper}" Foreground="{DynamicResource Ink}" FontFamily="Segoe UI Variable Text, Microsoft YaHei UI, Segoe UI" FontSize="14" UseLayoutRounding="True">
  <Grid Background="{DynamicResource Paper}"><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/><RowDefinition Height="Auto"/></Grid.RowDefinitions>
   <Border Background="{DynamicResource Card}" BorderBrush="{DynamicResource Edge}" BorderThickness="0,0,0,1" Padding="18,10">
    <DockPanel LastChildFill="False">
     <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center"><t:Glyph Kind="radio" Width="26" Height="26" Margin="0,0,9,0"/><TextBlock Text="Vedal AI" FontWeight="Bold" FontSize="21"/></StackPanel>
-    <WrapPanel DockPanel.Dock="Right" VerticalAlignment="Center">
-     <Button x:Name="SystemButton" Tag="system" Click="ModeClick" Content="跟随系统"/><Button x:Name="NeoButton" Tag="neo" Click="ModeClick" Content="Neo 白班"/><Button x:Name="EvoButton" Tag="evo" Click="ModeClick" Content="Evo 夜班"/>
-    </WrapPanel>
+    <Border DockPanel.Dock="Right" CornerRadius="8" Background="{DynamicResource Paper}" BorderBrush="{DynamicResource Edge}" BorderThickness="1" Padding="2"><StackPanel Orientation="Horizontal">
+     <Button x:Name="SystemButton" Style="{StaticResource QuietButton}" Tag="system" Click="ModeClick" Content="跟随系统"/>
+     <Button x:Name="NeoButton" Style="{StaticResource QuietButton}" Tag="neo" Click="ModeClick" AutomationProperties.Name="月之亮面" ToolTip="月之亮面 · Neo">
+      <StackPanel Orientation="Horizontal"><Ellipse Width="12" Height="12" Fill="{DynamicResource Ink}" Margin="0,0,6,0"/><TextBlock Text="月之亮面"/></StackPanel>
+     </Button>
+     <Button x:Name="EvoButton" Style="{StaticResource QuietButton}" Tag="evo" Click="ModeClick" AutomationProperties.Name="月之暗面" ToolTip="月之暗面 · Evo">
+      <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="WeatherMoon24" FontSize="15" Margin="0,0,5,0"/><TextBlock Text="月之暗面"/></StackPanel>
+     </Button>
+    </StackPanel></Border>
    </DockPanel>
   </Border>
   <Grid Grid.Row="1"><Grid.ColumnDefinitions><ColumnDefinition Width="116"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
    <Border Background="{DynamicResource Card}" BorderBrush="{DynamicResource Edge}" BorderThickness="0,0,1,0" Padding="9,15,6,10">
     <DockPanel><StackPanel DockPanel.Dock="Bottom">
-     <Button x:Name="Turtle" Click="TurtleClick" ToolTip="试听乌龟彩蛋" AutomationProperties.Name="试听乌龟彩蛋" BorderThickness="0">
+     <Button x:Name="Turtle" Style="{StaticResource QuietButton}" Click="TurtleClick" ToolTip="试听乌龟彩蛋" AutomationProperties.Name="试听乌龟彩蛋" BorderThickness="0">
       <StackPanel><Image x:Name="TutelImage" Width="35" Height="35" RenderOptions.BitmapScalingMode="NearestNeighbor"/>
        <TextBlock Text="Vedal AI" HorizontalAlignment="Center" FontSize="12"/></StackPanel></Button>
     </StackPanel><StackPanel x:Name="Nav"/></DockPanel>
@@ -33,31 +39,34 @@
       <TextBlock Style="{StaticResource Heading}" Margin="0,16,0,2" Text="Codex 主窗口"/>
       <TextBlock Style="{StaticResource Hint}" Text="先复制要用的主题，在 Codex「设置 → 外观」导入对应的浅色或深色槽。两槽都导入后可跟随系统。"/>
       <WrapPanel Margin="0,6,0,8">
-       <Button x:Name="CopyNeo" Tag="neo-light" Click="CopyTheme" Content="复制 Neo 浅色主题"/>
-       <Button x:Name="CopyEvo" Tag="evo-dark" Click="CopyTheme" Content="复制 Evo 深色主题"/>
+       <Button x:Name="CopyNeo" Tag="neo-light" Click="CopyTheme" Content="复制月之亮面"/>
+       <Button x:Name="CopyEvo" Tag="evo-dark" Click="CopyTheme" Content="复制月之暗面"/>
        <Button Click="ShowScenes" Content="打开两套壁纸包"/>
       </WrapPanel>
       <Border Style="{StaticResource Panel}"><StackPanel>
-       <TextBlock FontWeight="SemiBold" Text="窗边装饰"/><CheckBox x:Name="BadgeToggle" Content="在 Codex 窗边显示 Vedal 小龟" Click="PreferenceClick"/>
-       <CheckBox x:Name="MotionToggle" Content="减弱完成动效" Click="PreferenceClick"/>
+       <TextBlock FontWeight="SemiBold" Text="窗边装饰"/><ui:ToggleSwitch x:Name="BadgeToggle" Margin="0,9,0,4" Content="在 Codex 窗边显示 Vedal 小龟" Click="PreferenceClick"/>
+       <ui:ToggleSwitch x:Name="MotionToggle" Margin="0,4,0,7" Content="减弱完成动效" Click="PreferenceClick"/>
        <TextBlock Style="{StaticResource Hint}" Text="窄窗口自动收起值班牌。壁纸包可由 Dream Skin 导入；任务页降低画面强度，输入框与审批对话框保持实色。"/>
       </StackPanel></Border>
       <WrapPanel><Button Click="BackupTheme" Content="备份剪贴板中的原主题"/><Button Tag="light" Click="RestoreTheme" Content="复制浅色备份"/><Button Tag="dark" Click="RestoreTheme" Content="复制深色备份"/></WrapPanel>
      </StackPanel>
      <StackPanel x:Name="Voices" Visibility="Collapsed">
       <TextBlock Style="{StaticResource Heading}" Text="角色原声"/>
-      <TextBlock Style="{StaticResource Hint}" Text="同一项测试，白班和夜班有各自的收工台词。点选一行可更换本地 WAV，或回看剪辑出处。"/>
-      <WrapPanel><CheckBox x:Name="OnlineToggle" Margin="0,6,18,5" Content="使用个人联机片源" Click="PreferenceClick"/><CheckBox x:Name="AutoToggle" Content="测试结果自动播放" Click="PreferenceClick"/></WrapPanel>
-      <Grid Margin="0,5"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
-       <TextBlock Text="音量" VerticalAlignment="Center"/><Slider x:Name="VolumeSlider" Grid.Column="1" Margin="12,0" Minimum="0" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="VolumeChanged" VerticalAlignment="Center" AutomationProperties.Name="角色音量"/>
-       <TextBlock x:Name="VolumeText" Grid.Column="2" VerticalAlignment="Center"/><Button Grid.Column="3" Margin="10,0,0,0" Click="StopClick" Content="停止播放"/>
-      </Grid>
-      <StackPanel x:Name="VoiceRows"/><TextBlock Style="{StaticResource Hint}" Text="线上录音供个人欣赏。首次试听只请求固定片段并核对 SHA-256；已听片段可在本次运行中离线重播。"/>
+      <TextBlock Style="{StaticResource Hint}" Text="点「联网试听」只取这一句。更多菜单可导入本地 WAV 或查看出处。"/>
+      <Border Style="{StaticResource Panel}" Margin="0,14,0,12"><StackPanel>
+       <DockPanel><ui:SymbolIcon Symbol="Speaker224" FontSize="18" Margin="0,0,8,0" Foreground="{DynamicResource Accent}"/><TextBlock x:Name="VoiceFeedback" FontWeight="SemiBold" Text="选择一句试听" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite"/></DockPanel>
+       <Grid Margin="0,6,0,5"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+        <TextBlock Text="音量" VerticalAlignment="Center"/><Slider x:Name="VolumeSlider" Grid.Column="1" Margin="12,0" Minimum="0" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="VolumeChanged" VerticalAlignment="Center" AutomationProperties.Name="角色音量"/>
+        <TextBlock x:Name="VolumeText" MinWidth="35" TextAlignment="Right" Grid.Column="2" VerticalAlignment="Center"/><Button x:Name="StopAudio" Grid.Column="3" Margin="12,0,0,0" Click="StopClick" Content="停止" IsEnabled="False" AutomationProperties.Name="停止播放"/>
+       </Grid>
+       <WrapPanel><ui:ToggleSwitch x:Name="AutoToggle" Margin="0,7,20,3" Content="测试结果自动播放" Click="PreferenceClick"/><ui:ToggleSwitch x:Name="OnlineToggle" Margin="0,7,0,3" Content="允许后台联网取音" Click="PreferenceClick"/></WrapPanel>
+      </StackPanel></Border>
+      <Border Style="{StaticResource Panel}" Padding="14,1"><StackPanel x:Name="VoiceRows"/></Border>
      </StackPanel>
      <StackPanel x:Name="Activity" Visibility="Collapsed">
       <TextBlock Style="{StaticResource Heading}" Text="任务反馈"/>
       <TextBlock Style="{StaticResource Hint}" Text="接收本机已信任的 Codex 事件。记录只存在本次运行中；短标识用于区分不同聊天。"/>
-      <WrapPanel><CheckBox x:Name="AttentionToggle" Margin="0,6,18,5" Content="审批与提问时轻响一声" Click="PreferenceClick"/><CheckBox x:Name="MuteToggle" Content="暂停自动声音" Click="PreferenceClick"/></WrapPanel>
+      <WrapPanel><ui:ToggleSwitch x:Name="AttentionToggle" Margin="0,7,18,7" Content="审批与提问时轻响一声" Click="PreferenceClick"/><ui:ToggleSwitch x:Name="MuteToggle" Margin="0,7" Content="暂停自动声音" Click="PreferenceClick"/></WrapPanel>
       <Border Style="{StaticResource Panel}"><StackPanel><TextBlock x:Name="LastTitle" Text="等待任务事件" FontWeight="SemiBold"/><TextBlock x:Name="LastDetail" Style="{StaticResource Hint}" Text="可在「接入」启用插件，之后普通工作不会弹出这个面板。"/><WrapPanel x:Name="ResultActions"/></StackPanel></Border>
       <StackPanel x:Name="History"/>
      </StackPanel>

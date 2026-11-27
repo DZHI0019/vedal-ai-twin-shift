@@ -3,14 +3,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Automation;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Microsoft.Win32;
 using Forms = System.Windows.Forms;
+using Wpf.Ui.Appearance;
+using Wpf.Ui.Markup;
+using Fluent = Wpf.Ui.Controls;
 
 namespace TwinShift
 {
@@ -30,8 +33,12 @@ namespace TwinShift
             Interval = TimeSpan.FromMilliseconds(180)
         };
         readonly Dictionary<string, DateTime> seen = new Dictionary<string, DateTime>();
+        readonly Dictionary<string, Button> voiceButtons = new Dictionary<string, Button>();
+        int activeManual, playbackSequence;
         bool ready, exiting, backupInvalid, changing;
         string pendingKind;
+        string sceneFile;
+        ApplicationTheme appliedTheme = ApplicationTheme.Light;
         DateTime lastVoice, lastAttention, manualUntil;
         string lastResultScope;
         DateTime lastResultAt;
@@ -70,7 +77,8 @@ namespace TwinShift
             prefs = Preferences.Load(out string warning);
             backupInvalid = warning.Length > 0;
             deck = new AudioDeck(prefs);
-            deck.Notice += Say;
+            deck.Notice += AudioStatus;
+            deck.Started += key => AudioStatus("正在播放 · " + ClipTitle(key));
             badge = new BadgeWindow(prefs, badgeTarget, () => Manual("tutel"), () =>
             {
                 Reveal();
@@ -90,20 +98,21 @@ namespace TwinShift
             menu.Items.Add("退出", null, (s, e) => Exit());
             tray.ContextMenuStrip = menu;
             tray.DoubleClick += (s, e) => Reveal();
-            Icon = new BitmapImage(new Uri(Files.Asset("twinshift.ico")));
-            TutelImage.Source = new BitmapImage(new Uri(Files.Asset("tutel.png")));
+            Icon = Files.Image("twinshift.ico");
+            TutelImage.Source = Files.Image("tutel.png");
             string[] pages =
             {
                 "外观",
                 "原声",
                 "任务",
                 "接入"
-            }, icons =
+            };
+            Fluent.SymbolRegular[] icons =
             {
-                "screen",
-                "headphones",
-                "activity",
-                "plug"
+                Fluent.SymbolRegular.Desktop24,
+                Fluent.SymbolRegular.Headphones24,
+                Fluent.SymbolRegular.Pulse24,
+                Fluent.SymbolRegular.PlugConnected24
             };
             for (int i = 0; i < pages.Length; i++)
             {
@@ -112,9 +121,11 @@ namespace TwinShift
                 {
                     Orientation = Orientation.Horizontal
                 };
-                panel.Children.Add(Mark(icons[i], 16));
-                panel.Children.Add(new TextBlock { Text = pages[i], Margin = new Thickness(7, 0, 0, 0) });
+                panel.Children.Add(new Fluent.SymbolIcon { Symbol = icons[i], FontSize = 17, VerticalAlignment = VerticalAlignment.Center });
+                panel.Children.Add(new TextBlock { Text = pages[i], Margin = new Thickness(10, 0, 0, 0) });
                 var b = Btn(panel, () => Page(ix));
+                b.Style = (Style)FindResource("NavButton");
+                AutomationProperties.SetName(b, pages[i]);
                 Nav.Children.Add(b);
             }
 
@@ -242,7 +253,7 @@ namespace TwinShift
             for (int i = 0; i < pages.Length; i++)
             {
                 pages[i].Visibility = index == i ? Visibility.Visible : Visibility.Collapsed;
-                ((Button)Nav.Children[i]).SetResourceReference(BackgroundProperty, index == i ? "Soft" : "Card");
+                AutomationProperties.SetItemStatus((Button)Nav.Children[i], index == i ? "已选中" : "");
             }
 
             BodyScroll.ScrollToTop();
@@ -284,6 +295,12 @@ namespace TwinShift
         {
             bool night = prefs.Night;
             bool hc = SystemParameters.HighContrast;
+            var theme = hc ? ApplicationTheme.HighContrast : night ? ApplicationTheme.Dark : ApplicationTheme.Light;
+            if (appliedTheme != theme)
+            {
+                Application.Current.Resources.MergedDictionaries.OfType<ThemesDictionary>().Single().Theme = theme;
+                appliedTheme = theme;
+            }
             string[] keys =
             {
                 "Paper",
@@ -326,12 +343,13 @@ namespace TwinShift
 
             Application.Current.Resources["OnAccent"] = hc ? SystemColors.HighlightTextBrush :
                 (night ? Brushes.Black : Brushes.White);
+            ApplicationAccentColorManager.Apply(((SolidColorBrush)Application.Current.Resources["Accent"]).Color, theme, false, false);
             foreach (var button in new[] { SystemButton, NeoButton, EvoButton })
             {
                 bool selected = (string)button.Tag == prefs.Mode;
-                button.SetResourceReference(BackgroundProperty, selected ? "Soft" : "Card");
-                button.SetResourceReference(BorderBrushProperty, selected ? "Accent" : "Edge");
-                button.FontWeight = selected ? FontWeights.Bold : FontWeights.Normal;
+                button.SetResourceReference(BackgroundProperty, selected ? "Card" : "Paper");
+                button.SetResourceReference(BorderBrushProperty, selected ? "Edge" : "Paper");
+                button.FontWeight = selected ? FontWeights.SemiBold : FontWeights.Normal;
                 System.Windows.Automation.AutomationProperties.SetItemStatus(button, selected ? "已选中" : "");
             }
             foreach (var button in new[] { CopyNeo, CopyEvo })
@@ -340,11 +358,14 @@ namespace TwinShift
                 button.SetResourceReference(BackgroundProperty, active ? "Accent" : "Card");
                 button.SetResourceReference(ForegroundProperty, active ? "OnAccent" : "Ink");
             }
-            string image = Files.Asset(night ? "evo.jpg" : "neo.jpg");
-            if ((Scene.ImageSource as BitmapImage)?.UriSource.LocalPath != image)
-                Scene.ImageSource = new BitmapImage(new Uri(image));
-            HeroKicker.Text = night ? "Evil Neuro   /   Evo" : "Neuro-sama   /   Neo";
-            HeroTitle.Text = night ? "地下室夜班" : "复古电台白班";
+            string image = night ? "evo.jpg" : "neo.jpg";
+            if (sceneFile != image)
+            {
+                Scene.ImageSource = Files.Image(image);
+                sceneFile = image;
+            }
+            HeroKicker.Text = night ? "Evo  ·  地下室" : "Neo  ·  复古电台";
+            HeroTitle.Text = night ? "月之暗面" : "月之亮面";
             HeroDetails.Children.Clear();
             foreach (string name in night ? new[]
             {
@@ -368,7 +389,7 @@ namespace TwinShift
                 HeroDetails.Children.Add(g);
             }
 
-            ShiftStatus.Text = night ? "Evo · 夜班" : "Neo · 白班";
+            ShiftStatus.Text = night ? "Evo · 月之暗面" : "Neo · 月之亮面";
             badge.Apply();
         }
 
@@ -376,7 +397,7 @@ namespace TwinShift
         {
             prefs.Mode = (string)((Button)s).Tag;
             pendingKind = null;
-            deck.Stop();
+            CancelPlayback("切换外观后已停止播放。");
             Apply();
             SaveSoon();
         }
@@ -391,10 +412,15 @@ namespace TwinShift
             prefs.Attention = AttentionToggle.IsChecked == true;
             prefs.Muted = MuteToggle.IsChecked == true;
             if (prefs.Online && OnlineToggle.IsChecked != true)
+            {
+                CancelPlayback("已关闭后台取音并清除临时片段。");
                 deck.ClearOnline();
+            }
+            else if (activeManual == 0 && (s == MuteToggle || s == AutoToggle || s == AttentionToggle))
+                CancelPlayback("自动播放设置已更新。");
             prefs.Online = OnlineToggle.IsChecked == true;
             pendingKind = null;
-            deck.Stop();
+            RefreshVoiceButtons();
             badge.Apply();
             SaveSoon();
         }
@@ -407,7 +433,7 @@ namespace TwinShift
             VolumeText.Text = prefs.Volume + "%";
             deck.SetLevel();
             if (prefs.Volume == 0)
-                deck.Stop();
+                CancelPlayback("音量为零。");
             SaveSoon();
         }
 
@@ -417,6 +443,7 @@ namespace TwinShift
             prefs.Badge = prefs.Online = prefs.AutoVoice = prefs.Muted = prefs.Attention = prefs.QuietMotion = false;
             prefs.Volume = 60;
             deck.ClearOnline();
+            RefreshVoiceButtons();
             Sync();
             Apply();
             SaveSoon();
@@ -513,7 +540,8 @@ namespace TwinShift
                 if (dlg.ShowDialog(this) == true)
                 {
                     deck.Import(cue, dlg.FileName);
-                    Say(cue.Id + " 已使用本地文件。");
+                    RefreshVoiceButtons();
+                    AudioStatus("已导入 · " + cue.Line);
                 }
             });
             menu.Items.Add(import);
@@ -526,17 +554,21 @@ namespace TwinShift
                 if (deck.HasLocal(cue) && MessageBox.Show(this, "移除此句导入的副本？原文件保留。", "本地语音", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
                 {
                     deck.RemoveLocal(cue);
-                    Say("本地副本已移除。");
+                    RefreshVoiceButtons();
+                    AudioStatus("本地副本已移除。");
                 }
             });
             menu.Items.Add(remove);
             var more = new Button
             {
                 Content = "⋯",
+                Style = (Style)FindResource("QuietButton"),
                 ContextMenu = menu,
                 ToolTip = "本地音频与出处",
                 MinWidth = 32
             };
+            AutomationProperties.SetName(more, cue.Line + " 更多选项");
+            menu.Opened += (s, e) => remove.IsEnabled = deck.HasLocal(cue);
             more.Click += (s, e) =>
             {
                 menu.PlacementTarget = more;
@@ -544,41 +576,104 @@ namespace TwinShift
             };
             DockPanel.SetDock(more, Dock.Right);
             row.Children.Add(more);
-            var play = Btn("▷ 试听", () => Manual(cue.Id));
-            play.SetValue(AutomationProperties.NameProperty, "试听 " + cue.Speaker + " " + cue.Line);
+            var play = new Button { MinWidth = 80, VerticalAlignment = VerticalAlignment.Center };
+            play.Click += (s, e) => Manual(cue.Id, Equals(play.Tag, true));
+            voiceButtons.Add(cue.Id, play);
+            UpdateVoiceButton(cue, play);
             DockPanel.SetDock(play, Dock.Right);
             row.Children.Add(play);
-            var text = new StackPanel();
+            var text = new StackPanel { Margin = new Thickness(0, 0, 10, 0) };
+            text.Children.Add(new TextBlock { Text = cue.Speaker + "  ·  " + cue.Slot, Style = (Style)FindResource("Hint") });
             var line = new TextBlock
             {
-                Text = cue.Speaker + "   " + cue.Line,
+                Text = cue.Line,
+                FontSize = 15,
                 FontWeight = FontWeights.SemiBold
             };
             text.Children.Add(line);
-            text.Children.Add(new TextBlock { Text = cue.Slot + "   ·   " + cue.Translation, Style = (Style)FindResource("Hint") });
+            text.Children.Add(new TextBlock { Text = cue.Translation, Style = (Style)FindResource("Hint") });
             row.Children.Add(text);
             var card = new Border
             {
                 Child = row,
-                Padding = new Thickness(9, 3, 6, 3),
+                Padding = new Thickness(1, 7, 0, 7),
                 BorderThickness = new Thickness(0, 0, 0, 1)
             };
             card.SetResourceReference(Border.BorderBrushProperty, "Edge");
             VoiceRows.Children.Add(card);
         }
 
-        async void Manual(string key)
+        void UpdateVoiceButton(Cue cue, Button play)
         {
+            bool local = deck.HasLocal(cue), cached = deck.HasSessionClip(cue);
+            play.Tag = !local && !cached;
+            play.Content = local ? "本地试听" : cached ? "重播" : "联网试听";
+            play.ToolTip = local ? "播放已导入的 WAV" : cached ? "本次会话离线重播" : "只从公开片源获取这一句";
+            AutomationProperties.SetName(play, play.Content + " " + cue.Speaker + " " + cue.Line);
+        }
+
+        void RefreshVoiceButtons()
+        {
+            foreach (var pair in voiceButtons)
+                UpdateVoiceButton(deck.Clips[pair.Key], pair.Value);
+        }
+
+        string ClipTitle(string key) => key == "attention" ? "审批提示音" : deck.Clips[key].Speaker + " · " + deck.Clips[key].Line;
+
+        void AudioStatus(string message)
+        {
+            VoiceFeedback.Text = message;
+            Say(message);
+        }
+
+        async Task PlayCue(string key, bool once = false)
+        {
+            int sequence = ++playbackSequence;
+            StopAudio.IsEnabled = true;
+            try
+            {
+                if (await deck.Play(key, once))
+                    AudioStatus("已播完 · " + ClipTitle(key));
+            }
+            finally
+            {
+                if (sequence == playbackSequence)
+                {
+                    StopAudio.IsEnabled = false;
+                    RefreshVoiceButtons();
+                }
+            }
+        }
+
+        async void Manual(string key, bool once = false)
+        {
+            var cue = deck.Clips[key];
+            if (!once && !prefs.Online && !deck.HasLocal(cue) && !deck.HasSessionClip(cue))
+            {
+                Reveal();
+                Page(1);
+                voiceButtons[key].Focus();
+                voiceButtons[key].BringIntoView();
+                AudioStatus("试听 " + cue.Speaker + " 的这句台词，请点「联网试听」。");
+                return;
+            }
+            activeManual++;
             manualUntil = DateTime.UtcNow.AddSeconds(4);
-            if (await deck.Play(key))
-                Say(deck.Clips[key].Speaker + " · " + deck.Clips[key].Line);
+            try { await PlayCue(key, once); }
+            finally { activeManual--; }
+        }
+
+        void CancelPlayback(string message)
+        {
+            deck.Stop();
+            if (StopAudio.IsEnabled)
+                AudioStatus(message);
         }
 
         void StopClick(object s, RoutedEventArgs e)
         {
-            deck.Stop();
+            CancelPlayback("已停止播放。");
             pendingKind = null;
-            Say("已停止播放。");
         }
 
         void TurtleClick(object s, RoutedEventArgs e) => Manual("tutel");
@@ -651,7 +746,7 @@ namespace TwinShift
             string k = pendingKind;
             pendingKind = null;
             DateTime now = DateTime.UtcNow;
-            if (k == null || prefs.Muted || prefs.Volume == 0 || now < manualUntil)
+            if (k == null || prefs.Muted || prefs.Volume == 0 || activeManual > 0 || now < manualUntil)
                 return;
             bool attention = k == "permission" || k == "question";
             if (attention)
@@ -659,12 +754,12 @@ namespace TwinShift
                 if (!prefs.Attention || now - lastAttention < TimeSpan.FromSeconds(5))
                     return;
                 lastAttention = now;
-                await deck.Play("attention");
+                await PlayCue("attention");
             }
             else if (prefs.AutoVoice && (k == "passed" || prefs.Night) && now - lastVoice >= TimeSpan.FromSeconds(5))
             {
                 lastVoice = now;
-                await deck.Play(k == "failed" ? "shucks" : prefs.Night ? "win" : "yay");
+                await PlayCue(k == "failed" ? "shucks" : prefs.Night ? "win" : "yay");
             }
         }
 
