@@ -1,0 +1,17 @@
+name: Windows verification
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 15
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      - name: Build desktop app, event plugin, and wallpaper packages
+        run: ./tools/build.ps1
+      - name: Run isolated desktop, transport and palette checks
+        run: ./tools/test.ps1
