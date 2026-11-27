@@ -15,7 +15,7 @@
 
 ### 按钮和用量显示
 
-Neo 的主操作取龟壳的苔绿 `#45634F`，正文和随文字着色的刻度用 `#2B3932`，浅底为 `#F9F4EC`。控制台每组最多突出一个操作；键盘焦点、按下和禁用沿用按钮状态。色值测试覆盖主操作图标、正文、次要文字与 diff。设计参考 [GitHub Primer 的按钮层级](https://primer.style/product/components/button/)、[进度与可见数值](https://primer.style/product/components/progress-bar/) 和 [WCAG 非文本对比度](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html)。
+Neo 的主操作取龟壳的苔绿 `#5D7559`，正文和随文字着色的刻度用 `#2B3932`，浅底为 `#F9F4EC`。控制台每组最多突出一个操作；键盘焦点、按下和禁用沿用按钮状态。色值测试覆盖主操作图标、正文、次要文字与 diff。设计参考 [GitHub Primer 的按钮层级](https://primer.style/product/components/button/)、[进度与可见数值](https://primer.style/product/components/progress-bar/) 和 [WCAG 非文本对比度](https://www.w3.org/WAI/WCAG22/Understanding/non-text-contrast.html)。
 
 在上述桌面版本中，`/status` 的用量条由实心与浅色块字符组成，实际宽度决定段数。用量菜单另有百分比和重置时间。Dream Skin 1.5.21 的安全 CSS 部件包含输入框和工具栏，没有独立用量条或发送按钮选择器。主窗口通过原生前景和场景强调色着色，避免全局按钮规则影响警告或审批。检查新客户端时，分别看宽窗、窄窗和系统高对比度。
 
