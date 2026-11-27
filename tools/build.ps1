@@ -32,7 +32,12 @@ $directories=@('assets','themes','scenes','marketplace/.agents/plugins','marketp
 foreach($dir in $directories){[IO.Directory]::CreateDirectory((Join-Path $stage $dir)) | Out-Null}
 $files=@('app/bin/Release/net48/TwinShift.exe','app/bin/Release/net48/TwinShift.exe.config','LICENSE','docs/使用手册.html')
 foreach($file in $files){Stage-File (Join-Path $root $file) ([IO.Path]::GetFileName($file))}
-foreach($file in @('attention.wav','evo.jpg','neo.jpg','tutel.png','twinshift.ico','voices.json','NOTICE.md','TUTEL-LICENSE.md','DREAM-SKIN-LICENSE.txt')){Stage-File (Join-Path $root "assets/$file") "assets/$file"}
+$runtimeLibraries=@(
+    'NAudio.Core.dll','NAudio.Wasapi.dll','NLayer.dll','Wpf.Ui.dll','Wpf.Ui.Abstractions.dll',
+    'System.Buffers.dll','System.Memory.dll','System.Numerics.Vectors.dll','System.Runtime.CompilerServices.Unsafe.dll'
+)
+foreach($dll in $runtimeLibraries){Stage-File (Join-Path $root "app/bin/Release/net48/$dll") $dll}
+foreach($file in @('attention.wav','evo.jpg','neo.jpg','tutel.png','twinshift.ico','voices.json','NOTICE.md','TUTEL-LICENSE.md','DREAM-SKIN-LICENSE.txt','NAudio-LICENSE.txt','NLayer-LICENSE.txt','UI-LICENSES.txt')){Stage-File (Join-Path $root "assets/$file") "assets/$file"}
 foreach($name in @('neo','evo')){Stage-File (Join-Path $out "scenes/TwinShift-$name.zip") "scenes/TwinShift-$name.zip"}
 foreach($name in @('neo-light','evo-dark')){Stage-File (Join-Path $root "themes/$name.txt") "themes/$name.txt"}
 foreach($file in @('.agents/plugins/marketplace.json','plugin/.codex-plugin/plugin.json','plugin/hooks/hooks.json')){Stage-File (Join-Path $root $file) "marketplace/$file"}
@@ -50,7 +55,8 @@ if($MakeNSIS){
     $lines=@(foreach($item in ($items|Where-Object {!$_.PSIsContainer})){ 'Delete "$INSTDIR\'+$item.FullName.Substring($stage.Length+1)+'"' })
     $lines+=@(foreach($item in ($items|Where-Object {$_.PSIsContainer}|Sort-Object {$_.FullName.Length} -Descending)){ 'RMDir "$INSTDIR\'+$item.FullName.Substring($stage.Length+1)+'"' })
     [IO.File]::WriteAllLines((Join-Path $packageDir 'uninstall-files.nsh'),[string[]]$lines,[Text.UTF8Encoding]::new($true))
-    $compileArgs=@('/INPUTCHARSET','UTF8',"/DRELEASE_VERSION=$version","/DSTAGE=$stage","/DOUTPUT=$packageDir")
+    $numericVersion=([version]($version.Split('-')[0]+'.0')).ToString(4)
+    $compileArgs=@('/INPUTCHARSET','UTF8',"/DRELEASE_VERSION=$version","/DNUMERIC_VERSION=$numericVersion","/DSTAGE=$stage","/DOUTPUT=$packageDir")
     $savedSdk=$env:TWINSHIFT_SIGNTOOL
     $savedSigner=$env:TWINSHIFT_SIGNER
     try{

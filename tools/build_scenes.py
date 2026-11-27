@@ -54,7 +54,7 @@ def package_files(slot):
     manifest = {
         "packageVersion": 1,
         "themeId": theme["id"],
-        "version": "1.1.1",
+        "version": "1.1.2",
         "skinApiVersion": 1,
         "minClientVersion": CLIENT_VERSION,
         "platforms": ["macos", "windows"],
