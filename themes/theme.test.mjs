@@ -39,6 +39,8 @@ for (const { name, variant } of presets) {
     assert.equal(theme.accent, scene.colors.accent.toLowerCase());
     assert.equal(theme.ink, scene.colors.text.toLowerCase());
     assert.ok(contrastRatio(scene.colors.muted, scene.colors.panel) >= 4.5);
+    // The 26.1120 composer paints its idle waveform with the scene's muted ink.
+    assert.ok(contrastRatio(scene.colors.muted, scene.colors.accent) >= 3, 'visible voice waveform');
     assert.ok(contrastRatio(scene.colors.accent, variant === 'light' ? '#ffffff' : '#000000') >= 4.5);
     assert.equal(theme.accentSource, 'custom');
     assert.deepEqual(theme.fonts, { code: null, ui: null });
