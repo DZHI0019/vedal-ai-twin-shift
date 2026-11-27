@@ -1,0 +1,11 @@
+{
+  "name": "twin-shift-events",
+  "version": "1.1.0-beta.1",
+  "description": "Local Windows notifications for the Twin Shift theme.",
+  "interface": {
+    "displayName": "Vedal AI · 任务事件",
+    "shortDescription": "在已开启的值班室显示审批、提问和测试结果",
+    "developerName": "Twin Shift contributors",
+    "category": "Productivity"
+  }
+}
