@@ -48,12 +48,13 @@ def package_files(slot):
         "theme.css": read_text_bytes(SCENES / "theme.css"),
         "background.jpg": load_background(ROOT / "assets" / f"{slot}.jpg"),
         "LICENSE.txt": read_text_bytes(ROOT / "assets" / "NOTICE.md") +
-                       b"\n\nTheme definition and CSS\n\n" + read_text_bytes(ROOT / "LICENSE"),
+                       b"\n\nTheme definition and CSS\n\n" + read_text_bytes(ROOT / "LICENSE") +
+                       b"\n\nDream Skin\n\n" + read_text_bytes(ROOT / "assets" / "DREAM-SKIN-LICENSE.txt"),
     }
     manifest = {
         "packageVersion": 1,
         "themeId": theme["id"],
-        "version": "1.1.0",
+        "version": "1.1.1",
         "skinApiVersion": 1,
         "minClientVersion": CLIENT_VERSION,
         "platforms": ["macos", "windows"],

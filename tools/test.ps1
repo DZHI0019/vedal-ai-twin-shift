@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$ScratchRoot=[IO.Path]::GetTempPath(),[string]$InstalledRoot,[switch]$SkipRestore,[switch]$CheckVoiceSources,[switch]$CheckCodex)
+param([string]$ScratchRoot=[IO.Path]::GetTempPath(),[string]$InstalledRoot,[switch]$SkipRestore,[switch]$CheckVoiceSources,[switch]$CheckCodex,[string]$WallpaperEngine)
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 if(!$InstalledRoot){$InstalledRoot=Join-Path $root 'out/app'}
@@ -21,6 +21,7 @@ try {
     $options=@($shots)
     if($CheckVoiceSources){$options+='--online'}
     if($CheckCodex){$options+='--codex'}
+    if($WallpaperEngine){$options+=@('--wallpaper-engine',(Resolve-Path -LiteralPath $WallpaperEngine).Path)}
     & (Join-Path $stage 'TwinShift.Checks.exe') @options
     if($LASTEXITCODE){throw "Native tests failed. Test root: $run"}
     & node --test (Join-Path $root 'themes/theme.test.mjs')
