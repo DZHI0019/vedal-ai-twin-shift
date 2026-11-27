@@ -48,7 +48,13 @@ foreach ($cue in $cues) {
         throw "Packaged recording differs from its catalogue entry: $($cue.Id)"
     }
 }
-foreach($name in @('neo','evo')){Stage-File (Join-Path $out "scenes/TwinShift-$name.zip") "scenes/TwinShift-$name.zip"}
+foreach($name in @('neuro','Evil')){Stage-File (Join-Path $out "scenes/TwinShift-$name.zip") "scenes/TwinShift-$name.zip"}
+foreach($legacy in @('TwinShift-neo.zip','TwinShift-evo.zip')){
+    foreach($dir in @((Join-Path $out 'scenes'),(Join-Path $stage 'scenes'))){
+        $oldFile=Join-Path $dir $legacy
+        if(Test-Path -LiteralPath $oldFile){Remove-Item -LiteralPath $oldFile}
+    }
+}
 foreach($name in @('neo-light','evo-dark')){Stage-File (Join-Path $root "themes/$name.txt") "themes/$name.txt"}
 foreach($file in @('.agents/plugins/marketplace.json','plugin/.codex-plugin/plugin.json','plugin/hooks/hooks.json')){Stage-File (Join-Path $root $file) "marketplace/$file"}
 Stage-File (Join-Path $root 'signal/bin/Release/net48/TwinSignal.exe') 'marketplace/plugin/hooks/TwinSignal.exe'

@@ -19,12 +19,14 @@ $testName = 'twin-shift-dream-skin-' + [Guid]::NewGuid().ToString('N')
 $testRoot = [IO.Directory]::CreateDirectory((Join-Path $tempBase $testName)).FullName
 try {
     foreach ($slot in @('neo', 'evo')) {
+        $character = @{neo='neuro';evo='Evil'}[$slot]
         if ($PreviousArchiveDirectory) {
-            $oldArchive = (Resolve-Path -LiteralPath (Join-Path $PreviousArchiveDirectory "TwinShift-$slot.zip")).Path
+            $oldArchive = Join-Path $PreviousArchiveDirectory "TwinShift-$character.zip"
+            if (!(Test-Path -LiteralPath $oldArchive)) { $oldArchive = Join-Path $PreviousArchiveDirectory "TwinShift-$slot.zip" }
             $old = Import-DreamSkinThemeZip -ArchivePath $oldArchive -StateRoot $testRoot
             if ($old.Status -ne 'Imported' -or $old.Id -ne "twin-shift.$slot") { throw "Previous package setup failed for $slot." }
         }
-        $archive = (Resolve-Path -LiteralPath (Join-Path $ArchiveDirectory "TwinShift-$slot.zip")).Path
+        $archive = (Resolve-Path -LiteralPath (Join-Path $ArchiveDirectory "TwinShift-$character.zip")).Path
         $first = Import-DreamSkinThemeZip -ArchivePath $archive -StateRoot $testRoot
         if ($first.Status -ne 'Imported' -or $first.Id -ne "twin-shift.$slot" -or
             $first.PackageFormat -ne 'official' -or $first.SafeCssStatus -ne 'validated') {

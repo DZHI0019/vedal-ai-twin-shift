@@ -33,7 +33,7 @@ try {
     if($PreviousInstaller -and [IO.File]::ReadAllText((Join-Path $env:TWINSHIFT_DATA_DIR 'backup-light.txt')) -ne 'backup'){
         throw 'Upgrade did not preserve the previous theme backup'
     }
-    foreach($file in @('TwinShift.exe','portable.install','使用手册.html','marketplace/.agents/plugins/marketplace.json','marketplace/plugin/hooks/TwinSignal.exe','scenes/TwinShift-neo.zip','scenes/TwinShift-evo.zip')){
+    foreach($file in @('TwinShift.exe','portable.install','使用手册.html','marketplace/.agents/plugins/marketplace.json','marketplace/plugin/hooks/TwinSignal.exe','scenes/TwinShift-neuro.zip','scenes/TwinShift-Evil.zip')){
         if(!(Test-Path (Join-Path $target $file))){throw "Missing payload $file"}
     }
     $voices = Join-Path $target 'assets/voices'

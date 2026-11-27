@@ -8,11 +8,11 @@
     <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" VerticalAlignment="Center"><t:Glyph Kind="radio" Width="26" Height="26" Margin="0,0,9,0"/><TextBlock Text="Vedal AI" FontWeight="Bold" FontSize="21"/></StackPanel>
     <Border DockPanel.Dock="Right" CornerRadius="8" Background="{DynamicResource Paper}" BorderBrush="{DynamicResource Edge}" BorderThickness="1" Padding="2"><StackPanel Orientation="Horizontal">
      <Button x:Name="SystemButton" Style="{StaticResource QuietButton}" Tag="system" Click="ModeClick" Content="跟随系统"/>
-     <Button x:Name="NeoButton" Style="{StaticResource QuietButton}" Tag="neo" Click="ModeClick" AutomationProperties.Name="月之亮面" ToolTip="月之亮面 · Neo">
-      <StackPanel Orientation="Horizontal"><Ellipse Width="12" Height="12" Fill="{DynamicResource Ink}" Margin="0,0,6,0"/><TextBlock Text="月之亮面"/></StackPanel>
+     <Button x:Name="NeoButton" Style="{StaticResource QuietButton}" Tag="neo" Click="ModeClick" AutomationProperties.Name="neuro · 月之亮面" ToolTip="neuro · 月之亮面">
+      <StackPanel Orientation="Horizontal"><Ellipse Width="12" Height="12" Fill="{DynamicResource Ink}" Margin="0,0,6,0"/><TextBlock Text="neuro · 月之亮面"/></StackPanel>
      </Button>
-     <Button x:Name="EvoButton" Style="{StaticResource QuietButton}" Tag="evo" Click="ModeClick" AutomationProperties.Name="月之暗面" ToolTip="月之暗面 · Evo">
-      <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="WeatherMoon24" FontSize="15" Margin="0,0,5,0"/><TextBlock Text="月之暗面"/></StackPanel>
+     <Button x:Name="EvoButton" Style="{StaticResource QuietButton}" Tag="evo" Click="ModeClick" AutomationProperties.Name="Evil · 月之暗面" ToolTip="Evil · 月之暗面">
+      <StackPanel Orientation="Horizontal"><ui:SymbolIcon Symbol="WeatherMoon24" FontSize="15" Margin="0,0,5,0"/><TextBlock Text="Evil · 月之暗面"/></StackPanel>
      </Button>
     </StackPanel></Border>
    </DockPanel>
@@ -44,7 +44,8 @@
        <Button Click="ShowScenes" Content="打开两套壁纸包"/>
       </WrapPanel>
       <Border Style="{StaticResource Panel}"><StackPanel>
-       <TextBlock FontWeight="SemiBold" Text="窗边装饰"/><ui:ToggleSwitch x:Name="BadgeToggle" Margin="0,9,0,4" Content="在 Codex 窗边显示 Vedal 小龟" Click="PreferenceClick"/>
+       <TextBlock FontWeight="SemiBold" Text="Codex 主窗口"/><ui:ToggleSwitch x:Name="SceneToggle" Margin="0,9,0,4" Content="显示角色背景（随登录启动）" Click="PreferenceClick"/>
+       <ui:ToggleSwitch x:Name="BadgeToggle" Margin="0,4,0,4" Content="显示 Vedal 小龟" Click="PreferenceClick"/>
        <ui:ToggleSwitch x:Name="MotionToggle" Margin="0,4,0,7" Content="减弱完成动效" Click="PreferenceClick"/>
       </StackPanel></Border>
       <WrapPanel><Button Click="BackupTheme" Content="备份剪贴板中的原主题"/><Button Tag="light" Click="RestoreTheme" Content="复制浅色备份"/><Button Tag="dark" Click="RestoreTheme" Content="复制深色备份"/></WrapPanel>
@@ -73,7 +74,7 @@
        <TextBlock Style="{StaticResource Hint}" Text="启用后，在 Codex「设置 → Hooks」审阅，再打开新聊天。"/>
        <WrapPanel><Button x:Name="EnablePlugin" Click="EnableClick" Content="启用事件插件"/><Button x:Name="DisablePlugin" Click="DisableClick" Content="停用并移除插件"/></WrapPanel>
       </StackPanel></Border>
-      <Border Style="{StaticResource Panel}"><StackPanel><TextBlock FontWeight="SemiBold" Text="安装和恢复背景"/>
+      <Border Style="{StaticResource Panel}"><StackPanel><TextBlock FontWeight="SemiBold" Text="Dream Skin 壁纸包"/>
        <TextBlock Style="{StaticResource Hint}" Text="在 Dream Skin 中导入壁纸 ZIP。还原前请保存工作。"/>
        <WrapPanel><Button Click="ShowScenes" Content="打开壁纸包目录"/><Button Click="OpenWallpaperRelease" Content="壁纸宿主官方发布页"/><Button Click="OpenGuide" Content="使用手册"/></WrapPanel>
        <WrapPanel><Button Click="EnableWallpaperHeader" Content="适配新版标题栏"/><Button Click="RestoreWallpaperHeader" Content="还原宿主标题栏"/></WrapPanel>

@@ -56,6 +56,9 @@ FunctionEnd
 Section
   SetOutPath "$INSTDIR"
   File /r "${STAGE}\*.*"
+  IfFileExists "$INSTDIR\twinshift.install" 0 +3
+  Delete "$INSTDIR\scenes\TwinShift-neo.zip"
+  Delete "$INSTDIR\scenes\TwinShift-evo.zip"
   FileOpen $0 "$INSTDIR\twinshift.install" w
   FileWrite $0 "TwinShift ${RELEASE_VERSION}"
   FileClose $0
@@ -84,9 +87,14 @@ Section "Uninstall"
     SetErrorLevel 3
     Abort
   ${EndIf}
-  IfFileExists "$INSTDIR\portable.install" +3 0
-  Delete "$SMPROGRAMS\Twin Shift.lnk"
-  DeleteRegKey HKCU "${UNKEY}"
+  ${IfNot} ${FileExists} "$INSTDIR\portable.install"
+    Delete "$SMPROGRAMS\Twin Shift.lnk"
+    DeleteRegKey HKCU "${UNKEY}"
+    ReadRegStr $0 HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Vedal AI Twin Shift"
+    ${If} $0 == '"$INSTDIR\TwinShift.exe" --tray'
+      DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Vedal AI Twin Shift"
+    ${EndIf}
+  ${EndIf}
   !include "${OUTPUT}\uninstall-files.nsh"
   Delete "$INSTDIR\portable.install"
   Delete "$INSTDIR\twinshift.install"

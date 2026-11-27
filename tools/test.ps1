@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$ScratchRoot=[IO.Path]::GetTempPath(),[string]$InstalledRoot,[switch]$SkipRestore,[switch]$CheckAudioOutput,[switch]$CheckCodex,[string]$WallpaperEngine)
+param([string]$ScratchRoot=[IO.Path]::GetTempPath(),[string]$InstalledRoot,[switch]$SkipRestore,[switch]$CheckAudioOutput,[switch]$CheckCodex,[switch]$CheckWindowScene,[string]$WallpaperEngine)
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 if(!$InstalledRoot){$InstalledRoot=Join-Path $root 'out/app'}
@@ -24,6 +24,10 @@ try {
     if($WallpaperEngine){$options+=@('--wallpaper-engine',(Resolve-Path -LiteralPath $WallpaperEngine).Path)}
     & (Join-Path $stage 'TwinShift.Checks.exe') @options
     if($LASTEXITCODE){throw "Native tests failed. Test root: $run"}
+    if($CheckWindowScene){
+        & (Join-Path $stage 'TwinShift.Checks.exe') --window-scene
+        if($LASTEXITCODE){throw "Visible wallpaper test failed. Test root: $run"}
+    }
     & node --test (Join-Path $root 'themes/theme.test.mjs')
     if($LASTEXITCODE){throw 'Palette tests failed'}
     Write-Output "Run and native window screenshots: $run"

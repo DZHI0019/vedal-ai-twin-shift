@@ -1,7 +1,7 @@
 [
   {
     "Id": "yay",
-    "Speaker": "Neuro",
+    "Speaker": "neuro",
     "Line": "Yay!",
     "Translation": "耶！",
     "Slot": "测试通过",
@@ -25,7 +25,7 @@
   },
   {
     "Id": "filtered",
-    "Speaker": "Neuro",
+    "Speaker": "neuro",
     "Line": "Filtered.",
     "Translation": "被过滤了。",
     "Slot": "拒绝命令后 · 手动",
@@ -37,7 +37,7 @@
   },
   {
     "Id": "help",
-    "Speaker": "Neuro",
+    "Speaker": "neuro",
     "Line": "Someone tell Vedal there is a problem with my AI.",
     "Translation": "谁去告诉 Vedal，我的 AI 出问题了。",
     "Slot": "连接中断 · 手动",
@@ -73,10 +73,10 @@
   },
   {
     "Id": "tutel",
-    "Speaker": "Neuro",
+    "Speaker": "neuro",
     "Line": "Tutel loves you all!",
     "Translation": "龟龟爱你们！",
-    "Slot": "点侧栏小龟 · 手动",
+    "Slot": "控制台小龟 · 手动",
     "Seconds": 2,
     "Gain": 0.616,
     "Source": "https://api.neurokaraoke.com/api/soundbites/a5b0b1b5-729c-4975-a826-cf3839536f16",

@@ -79,6 +79,7 @@ namespace TwinShift
         public bool AutoVoice { get; set; }
         public bool Attention { get; set; }
         public bool Badge { get; set; }
+        public bool WindowScene { get; set; }
         public bool Muted { get; set; }
         public bool QuietMotion { get; set; }
         internal static string FileName => Path.Combine(SignalBus.Root, "settings.json");

@@ -22,6 +22,8 @@ namespace TwinShift
         [DllImport("user32.dll")]
         static extern IntPtr GetForegroundWindow();
         [DllImport("user32.dll")]
+        static extern IntPtr GetWindow(IntPtr window, uint relation);
+        [DllImport("user32.dll")]
         static extern bool GetWindowRect(IntPtr h, out Rect r);
         [DllImport("user32.dll")]
         static extern uint GetWindowThreadProcessId(IntPtr h, out uint pid);
@@ -47,6 +49,10 @@ namespace TwinShift
         readonly Process target;
         readonly Border frame;
         readonly Glyph chip;
+        readonly WindowScene scene = new WindowScene();
+        DateTime nextLookup;
+        string sceneError;
+        internal event Action<string> SceneFailed;
         IntPtr cachedHandle;
         uint cachedPid;
         bool eligible;
@@ -91,7 +97,7 @@ namespace TwinShift
             frame.SetResourceReference(Border.BackgroundProperty, "Card");
             frame.SetResourceReference(Border.BorderBrushProperty, "Edge");
             Content = frame;
-            ToolTip = "Vedal AI · 点击听小龟，右键打开值班室";
+            ToolTip = "Vedal AI · 点击听小龟，右键打开控制台";
             MouseLeftButtonUp += (s, e) => click();
             MouseRightButtonUp += (s, e) => panel();
             SourceInitialized += (s, e) =>
@@ -103,6 +109,7 @@ namespace TwinShift
             reset.Tick += (s, e) =>
             {
                 reset.Stop();
+                scene.Pulse(null);
                 chip.Kind = prefs.Night ? "pipes" : "heart";
             };
         }
@@ -111,17 +118,29 @@ namespace TwinShift
         {
             reset.Stop();
             chip.Kind = prefs.Night ? "pipes" : "heart";
-            if (prefs.Badge && !SystemParameters.HighContrast)
+            if (!prefs.WindowScene) scene.Dispose();
+            if ((prefs.WindowScene || prefs.Badge) && !SystemParameters.HighContrast)
+            {
                 tracker.Start();
+                Track();
+            }
             else
             {
                 tracker.Stop();
+                scene.Dispose();
                 Hide();
             }
         }
 
         internal void Pulse(string glyph)
         {
+            if (prefs.WindowScene && scene.Parent != IntPtr.Zero)
+            {
+                scene.Pulse(glyph);
+                reset.Stop();
+                reset.Start();
+                return;
+            }
             if (!IsVisible)
                 return;
             chip.Kind = glyph;
@@ -138,8 +157,10 @@ namespace TwinShift
             {
                 IntPtr main = GetForegroundWindow();
                 GetWindowThreadProcessId(main, out uint pid);
-                if (target != null && (pid != target.Id || target.HasExited))
+                if (target != null && target.HasExited)
                 {
+                    scene.Dispose();
+                    tracker.Stop();
                     Hide();
                     return;
                 }
@@ -149,13 +170,30 @@ namespace TwinShift
                     cachedPid = pid;
                     eligible = false;
                     var cls = new StringBuilder(100);
-                    if (main != IntPtr.Zero && GetClassName(main, cls, 100) > 0 && cls.ToString() == "Chrome_WidgetWin_1")
+                    if ((target == null || pid == target.Id) && main != IntPtr.Zero && GetWindow(main, 4) == IntPtr.Zero &&
+                        GetClassName(main, cls, 100) > 0 && cls.ToString() == "Chrome_WidgetWin_1")
                     {
                         using (var p = Process.GetProcessById((int)pid))
                             eligible = CodexDesktop.Matches(p);
                     }
                 }
 
+                if (prefs.WindowScene)
+                {
+                    if (IsVisible) Hide();
+                    var parent = eligible ? main : scene.Parent;
+                    if (parent == IntPtr.Zero && DateTime.UtcNow >= nextLookup)
+                    {
+                        parent = FindMainWindow();
+                        nextLookup = DateTime.UtcNow.AddSeconds(3);
+                    }
+                    if (parent != IntPtr.Zero)
+                    {
+                        scene.Present(parent, WindowScene.IsNight(parent, prefs), prefs.Badge);
+                        sceneError = null;
+                    }
+                    return;
+                }
                 if (!eligible || !GetWindowRect(main, out var r))
                 {
                     Hide();
@@ -173,16 +211,42 @@ namespace TwinShift
                     Show();
                 SetWindowPos(new WindowInteropHelper(this).Handle, new IntPtr(-1), r.Left + (int)(15 * dpi), r.Bottom - (int)(78 * dpi), 0, 0, 0x0011);
             }
-            catch (Exception e)when (e is ArgumentException || e is InvalidOperationException || e is System.ComponentModel.Win32Exception)
+            catch (Exception e)when (e is ArgumentException || e is InvalidOperationException || e is System.ComponentModel.Win32Exception || e is System.IO.IOException)
             {
+                scene.Dispose();
+                if (prefs.WindowScene && sceneError != e.Message)
+                {
+                    sceneError = e.Message;
+                    SceneFailed?.Invoke("主窗口场景没有加载。" + e.Message);
+                }
                 Hide();
             }
+        }
+
+        IntPtr FindMainWindow()
+        {
+            if (target != null)
+            {
+                target.Refresh();
+                return target.MainWindowHandle;
+            }
+            IntPtr found = IntPtr.Zero;
+            foreach (var process in Process.GetProcessesByName("ChatGPT"))
+                using (process)
+                {
+                    if (found != IntPtr.Zero || process.MainWindowHandle == IntPtr.Zero || !CodexDesktop.Matches(process)) continue;
+                    var cls = new StringBuilder(100);
+                    if (GetClassName(process.MainWindowHandle, cls, cls.Capacity) > 0 && cls.ToString() == "Chrome_WidgetWin_1")
+                        found = process.MainWindowHandle;
+                }
+            return found;
         }
 
         internal void Finish()
         {
             tracker.Stop();
             reset.Stop();
+            scene.Dispose();
             Close();
         }
     }

@@ -54,7 +54,7 @@ def package_files(slot):
     manifest = {
         "packageVersion": 1,
         "themeId": theme["id"],
-        "version": "1.1.2",
+        "version": "1.1.3",
         "skinApiVersion": 1,
         "minClientVersion": CLIENT_VERSION,
         "platforms": ["macos", "windows"],
@@ -77,7 +77,8 @@ def package_files(slot):
 
 def build(slot, scratch, validator):
     files = package_files(slot)
-    archive = scratch / f"TwinShift-{slot}.zip"
+    character = {"neo": "neuro", "evo": "Evil"}[slot]
+    archive = scratch / f"TwinShift-{character}.zip"
     # Fixed metadata and stored entries make the same inputs reproducible across platforms.
     with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_STORED) as out:
         for name, data in sorted(files.items()):

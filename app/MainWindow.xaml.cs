@@ -83,6 +83,7 @@ namespace TwinShift
                 Reveal();
                 Page(2);
             });
+            badge.SceneFailed += Say;
             receiver = new Receiver();
             receiver.Received += (k, id, s) => Dispatcher.BeginInvoke(new Action(() => Event(k, id, s)));
             receiver.Start();
@@ -167,6 +168,7 @@ namespace TwinShift
             ready = true;
             Apply();
             Page(0);
+            if (prefs.WindowScene) Guard(() => SceneStartup.Set(true));
             if (backupInvalid)
                 Say(warning);
         }
@@ -262,6 +264,7 @@ namespace TwinShift
 
         void Sync()
         {
+            SceneToggle.IsChecked = prefs.WindowScene;
             BadgeToggle.IsChecked = prefs.Badge;
             MotionToggle.IsChecked = prefs.QuietMotion;
             AutoToggle.IsChecked = prefs.AutoVoice;
@@ -364,7 +367,7 @@ namespace TwinShift
                 Scene.ImageSource = Files.Image(image);
                 sceneFile = image;
             }
-            HeroKicker.Text = night ? "Evo  ·  地下室" : "Neo  ·  复古电台";
+            HeroKicker.Text = night ? "Evil  ·  地下室" : "neuro  ·  复古电台";
             HeroTitle.Text = night ? "月之暗面" : "月之亮面";
             HeroDetails.Children.Clear();
             foreach (string name in night ? new[]
@@ -405,6 +408,8 @@ namespace TwinShift
         {
             if (!ready)
                 return;
+            prefs.WindowScene = SceneToggle.IsChecked == true;
+            if (s == SceneToggle) Guard(() => SceneStartup.Set(prefs.WindowScene));
             prefs.Badge = BadgeToggle.IsChecked == true;
             prefs.QuietMotion = MotionToggle.IsChecked == true;
             prefs.AutoVoice = AutoToggle.IsChecked == true;
@@ -432,7 +437,8 @@ namespace TwinShift
         void DefaultPrefs(object s, RoutedEventArgs e)
         {
             prefs.Mode = "system";
-            prefs.Badge = prefs.AutoVoice = prefs.Muted = prefs.Attention = prefs.QuietMotion = false;
+            prefs.WindowScene = prefs.Badge = prefs.AutoVoice = prefs.Muted = prefs.Attention = prefs.QuietMotion = false;
+            Guard(() => SceneStartup.Set(false));
             prefs.Volume = 60;
             CancelPlayback("已停止播放。");
             Sync();

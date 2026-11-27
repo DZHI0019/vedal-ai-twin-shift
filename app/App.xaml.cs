@@ -67,7 +67,7 @@ namespace TwinShift
             }
             catch (Exception err)
             {
-                MessageBox.Show("值班室无法启动。请确认安装完整，且个人设置目录可以写入。\n" + err.GetType().Name, "Twin Shift", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Vedal AI 无法启动。请确认安装完整，且个人设置目录可以写入。\n" + err.GetType().Name, "Twin Shift", MessageBoxButton.OK, MessageBoxImage.Error);
                 Shutdown(1);
             }
         }
