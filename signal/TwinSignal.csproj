@@ -1,0 +1,4 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><OutputType>Exe</OutputType><AssemblyName>TwinSignal</AssemblyName></PropertyGroup>
+  <ItemGroup><Compile Include="../shared/SignalBus.cs" Link="SignalBus.cs" /><Reference Include="System.Web.Extensions" /></ItemGroup>
+</Project>
