@@ -125,6 +125,10 @@ namespace TwinShift
             try
             {
                 Directory.CreateDirectory(SignalBus.Root);
+                string defaultData = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "TwinShift", "Data");
+                foreach (string empty in new[] { null, "", "  " })
+                    Require(SignalBus.ResolveDataDirectory(empty) == defaultData, "Empty data override uses the per-user directory");
+                Require(SignalBus.ResolveDataDirectory(SignalBus.Root) == SignalBus.Root, "Explicit data directory is preserved");
                 int engine = Array.IndexOf(args, "--wallpaper-engine");
                 if (engine >= 0)
                     WallpaperHeaderChecks.Run(args[engine + 1]);
