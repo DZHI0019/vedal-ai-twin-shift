@@ -1,7 +1,10 @@
 [CmdletBinding()]
-param([Parameter(Mandatory)][string]$Installer,[string]$ScratchRoot=[IO.Path]::GetTempPath(),[string]$PreviousInstaller)
+param([Parameter(Mandatory)][string]$Installer,[string]$ScratchRoot=[IO.Path]::GetTempPath(),[string]$PreviousInstaller,
+    [string]$SignTool,[string]$SignerThumbprint)
 $ErrorActionPreference='Stop'
 $setup=(Resolve-Path -LiteralPath $Installer).Path
+$verify=Join-Path $PSScriptRoot '../tools/windows-signature.ps1'
+if($SignTool -or $SignerThumbprint){& $verify -Mode Verify -Path $setup -SignTool $SignTool -SignerThumbprint $SignerThumbprint}
 $run=[IO.Directory]::CreateDirectory((Join-Path $ScratchRoot ('twinshift-setup-'+[Guid]::NewGuid().ToString('N')))).FullName
 $target=Join-Path $run '安装测试 with spaces'
 $savedData=$env:TWINSHIFT_DATA_DIR
@@ -22,6 +25,11 @@ try {
         [IO.File]::WriteAllText((Join-Path $env:TWINSHIFT_DATA_DIR 'backup-light.txt'),'backup')
     }
     Execute $setup "/S /PORTABLE /D=$target" 0
+    if($SignTool -or $SignerThumbprint){
+        foreach($binary in @('TwinShift.exe','marketplace/plugin/hooks/TwinSignal.exe','Uninstall.exe')){
+            & $verify -Mode Verify -Path (Join-Path $target $binary) -SignTool $SignTool -SignerThumbprint $SignerThumbprint
+        }
+    }
     if($PreviousInstaller -and [IO.File]::ReadAllText((Join-Path $env:TWINSHIFT_DATA_DIR 'backup-light.txt')) -ne 'backup'){
         throw 'Upgrade did not preserve the previous theme backup'
     }
