@@ -4,7 +4,7 @@
   <SolidColorBrush x:Key="Paper" Color="#F9F4EC"/><SolidColorBrush x:Key="Card" Color="#FFFCF7"/>
   <SolidColorBrush x:Key="Soft" Color="#E6ECE1"/><SolidColorBrush x:Key="Ink" Color="#2B3932"/>
   <SolidColorBrush x:Key="Muted" Color="#565F56"/><SolidColorBrush x:Key="Edge" Color="#D9CFC4"/>
-  <SolidColorBrush x:Key="Accent" Color="#45634F"/><SolidColorBrush x:Key="Good" Color="#246148"/>
+  <SolidColorBrush x:Key="Accent" Color="#5D7559"/><SolidColorBrush x:Key="Good" Color="#246148"/>
   <Style TargetType="TextBlock"><Setter Property="Foreground" Value="{DynamicResource Ink}"/><Setter Property="TextWrapping" Value="Wrap"/></Style>
   <Style x:Key="Hint" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
    <Setter Property="FontSize" Value="12"/><Setter Property="Foreground" Value="{DynamicResource Muted}"/><Setter Property="LineHeight" Value="19"/>

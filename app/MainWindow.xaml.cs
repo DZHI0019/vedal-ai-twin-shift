@@ -313,7 +313,7 @@ namespace TwinShift
                 "#2B3932",
                 "#565F56",
                 "#D9CFC4",
-                "#45634F",
+                "#5D7559",
                 "#246148"
             };
             for (int i = 0; i < keys.Length; i++)
