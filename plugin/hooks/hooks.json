@@ -1,0 +1,71 @@
+{
+  "hooks": {
+    "PermissionRequest": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "true",
+            "commandWindows": "\"%PLUGIN_ROOT%\\hooks\\TwinSignal.exe\"",
+            "timeout": 3,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "^(functions\\.)?request_user_input(_async)?$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "true",
+            "commandWindows": "\"%PLUGIN_ROOT%\\hooks\\TwinSignal.exe\"",
+            "timeout": 3,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "^Bash$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "true",
+            "commandWindows": "\"%PLUGIN_ROOT%\\hooks\\TwinSignal.exe\"",
+            "timeout": 3,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "true",
+            "commandWindows": "\"%PLUGIN_ROOT%\\hooks\\TwinSignal.exe\"",
+            "timeout": 3,
+            "async": true
+          }
+        ]
+      }
+    ],
+    "Interrupt": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "true",
+            "commandWindows": "\"%PLUGIN_ROOT%\\hooks\\TwinSignal.exe\"",
+            "timeout": 3,
+            "async": true
+          }
+        ]
+      }
+    ]
+  }
+}
