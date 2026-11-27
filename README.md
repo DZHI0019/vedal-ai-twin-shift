@@ -1,15 +1,15 @@
 # Vedal AI · Twin Shift
 
-**当前公开安装包为 v1.1.0-beta.1。** 本分支包含 beta.2 候选修复。[公开版本和 SHA-256 清单](https://github.com/DZHI0019/vedal-ai-twin-shift/releases)
+**当前公开安装包为 v1.1.0-beta.1。** 本分支包含 beta.3 语音与界面修复。[公开版本和 SHA-256 清单](https://github.com/DZHI0019/vedal-ai-twin-shift/releases)
 
-给 Windows 版 Codex 的 Neuro-sama、Evil Neuro 和 Vedal 同人主题。Neo 白班用暖纸色、IBM 5100 和电台小灯；Evo 夜班用近黑灰阶、地下室管道和碎心。代码仍有清晰的增删标记。Vedal AI 是主题署名，模型名称和权限审批由 Codex 显示。
+给 Windows 版 Codex 的 Neuro-sama、Evil Neuro 和 Vedal 同人主题。Neo 的「月之亮面」使用暖纸色和 IBM 5100 电台，Evo 的「月之暗面」使用近黑灰阶和地下室场景。代码仍有清晰的增删标记。Vedal AI 是主题署名，模型名称和权限审批由 Codex 显示。
 
 ## 使用
 
-1. 运行发布包中的 `TwinShift-1.1.0-beta.1-Setup.exe`。安装面向当前 Windows 用户，需要 .NET Framework 4.8。打开开始菜单中的 **Twin Shift**。
-2. 在控制台「外观」备份 Codex 原有的两槽主题，分别复制 Neo 和 Evo 到 Codex「设置 → 外观」对应的导入框。选择系统模式后，窗口配色会随系统外观切换。侧栏小龟可以单独开启。
+1. 运行所选版本的 `TwinShift-<版本>-Setup.exe`。安装面向当前 Windows 用户，需要 .NET Framework 4.8。打开开始菜单中的 **Twin Shift**。
+2. 在控制台「外观」备份 Codex 原有的两槽主题，分别将「月之亮面」和「月之暗面」导入 Codex「设置 → 外观」中的浅色和深色槽。选择系统模式后，窗口配色会随系统外观切换。侧栏小龟可以单独开启。
 3. 想看两幅场景时，将「打开两套壁纸包」中的 ZIP 导入 Dream Skin，再从 Saved Themes 选择。它是可选的第三方宿主，每套主题使用一张图。安装、恢复和重启由使用者决定。[Dream Skin v1.5.21](https://github.com/Fei-Away/Codex-Dream-Skin/releases/tag/v1.5.21)
-4. 在「原声」开启个人联机片源后点试听，或从台词的 **⋯** 导入本地 WAV。八句原声覆盖两位角色和 Vedal。在线录音仅按需取得，逐句校验 SHA-256。安装包包含目录、出处和一声原创注意提示。
+4. 在「原声」点台词旁的 **联网试听** 即可播放这一句。已听片段可从内存重播。也可从 **⋯** 导入本地 PCM WAV。八句原声覆盖两位角色和 Vedal。在线录音仅按需取得，逐句校验 SHA-256。安装包包含目录、出处和一声原创注意提示。
 5. 在「接入」启用事件插件，在 Codex 的 Hooks 设置审阅该插件并打开新聊天。在「原声」选择是否自动播放测试结果。控制台可收进托盘。审批、提问、测试成功、失败、中断和普通回合结束分别处理。
 
 | 场景 | 可以看到、听到的反馈 |
@@ -20,7 +20,7 @@
 | 有通过报告 | 白班 Heart 和「Yay!」，夜班管道和「I win? Let’s go!」。通过记录提供 Vedal 和管道彩蛋。 |
 | 有失败报告 | 显示失败；夜班可播放「Aww, shucks.」。普通回合结束只显示文字。 |
 
-联机、自动语音和窗边装饰均默认关闭。主题程序没有后台更新服务或遥测。安装本身不会启用插件、应用配色或重启 Codex。恢复、片源和手动卸载步骤见[使用手册](docs/使用手册.html)。
+后台联网、自动语音和窗边装饰均默认关闭。主题程序没有后台更新服务或遥测。安装本身不会启用插件、应用配色或重启 Codex。恢复、片源和手动卸载步骤见[使用手册](docs/使用手册.html)。
 
 ### Beta 兼容情况
 
@@ -36,7 +36,7 @@
 ./tools/build.ps1
 ./tools/test.ps1
 ./tools/build.ps1 -MakeNSIS 'C:\Program Files (x86)\NSIS\makensis.exe'
-./tests/installer.ps1 -Installer './out/TwinShift-1.1.0-beta.2-Setup.exe'
+./tests/installer.ps1 -Installer './out/TwinShift-1.1.0-beta.3-Setup.exe'
 ```
 
 编译产物在 `out/`。主题源、素材署名、版本兼容和复验步骤见[维护手册](docs/MAINTAINING.md)。欢迎提交可复现的问题，附 Codex、Windows、主题版本和操作步骤即可。发截图前请遮盖项目名、聊天内容和个人路径。
