@@ -37,13 +37,30 @@ Codex 插件仅声明五类异步命令钩子。Windows 默认命令解释器展
 
 ```powershell
 ./tools/build.ps1
-./tools/test.ps1 -CheckVoiceSources -CheckCodex
+./tools/test.ps1 -CheckVoiceSources -CheckCodex -WallpaperEngine ../Codex-Dream-Skin/windows
 node ./tests/host-hooks.mjs ./out/app
 ./tools/build.ps1 -DreamValidator ../Codex-Dream-Skin/runtime/theme-package-validator.mjs -MakeNSIS 'C:\Program Files (x86)\NSIS\makensis.exe'
 ./tests/dream-skin.ps1 -UpstreamRoot ../Codex-Dream-Skin
-./tests/installer.ps1 -Installer ./out/TwinShift-1.1.0-beta.1-Setup.exe
+./tests/installer.ps1 -Installer ./out/TwinShift-1.1.0-beta.2-Setup.exe
 ```
 
 Dream Skin 源码应固定到 v1.5.21，Windows 导入器需要上游认可的签名 Node.js。CI 包含编译、原生窗口、离线音频、事件通道和配色验证。发布前在隔离桌面配置导入两槽和两图，核对审批控件可点击、变更可读、可还原；使用物理音箱时再复查相对音量。联网素材回访与用户桌面视觉验收单独进行。
 
-版本变更时同步 `Directory.Build.props`、`app/app.manifest`、插件描述、场景打包元数据、NSIS 和使用手册。通过上述检查后，从干净检出构建安装包，从相同提交导出源码。记录提交、工具版本、SHA-256 及签名状态。代码或源包校验值不能代替发布者签名。此版本尚未签署 Authenticode。
+### 标题栏与隔离实例
+
+宿主兼容适配固定在 Dream Skin v1.5.21（提交 `6fc42df48a6a5365011f55cc349e20c038e56d1d`）。上游 `tools/selectors.json` 中的 `header-tint` 对应两个标题表面：主区标题栏与 Windows 应用菜单。维护本适配时，在上游源码修改该选择器，再运行 `node tools/sync-runtime-assets.mjs`。核对 Windows 生成的 CSS、渲染器和选择器清单的字节及 SHA-256。控制台会在写入前检查三份文件；已知的中间状态支持重新应用或还原。用户更新到其他宿主版本后，需重新核验选择器。
+
+在独立桌面配置中，可用 `TwinShift.exe --tray --window-pid <测试窗口进程号>` 启动伴侣。启动前将 `TWINSHIFT_DATA_DIR` 指向专用目录，并在该配置开启小龟。绑定仅在本次进程有效。验收时把脚本生成的检查结果与用户可见的画面分别记录，截图存放在公开源树之外。
+
+### Windows 发布签名
+
+在项目获授权的 Windows 签名机上使用 SDK 的 `signtool.exe`。下列参数适用于当前用户证书库中可用的硬件或托管密钥。维护者需提前确认所选发布者的公开身份适合展示在安装包属性中。私钥保留在签名端。普通编译写入 `out/`，带签名构建通过验证后写入 `out/signed/`。
+
+```powershell
+./tools/build.ps1 -Signed -MakeNSIS $makeNsis -SignTool $signTool -SignerThumbprint $publicThumbprint
+./tests/installer.ps1 -Installer $installer -SignTool $signTool -SignerThumbprint $publicThumbprint
+```
+
+构建先校验发布者证书，再依次签署伴侣、事件程序、NSIS 卸载器和最终安装包。文件摘要与 RFC 3161 时间戳均采用 SHA-256。任一步失败都会中止发布。发布前在采用默认信任库的干净 Windows 环境再次运行第二条命令，核验四个可执行文件和安装、卸载流程。对由外部机构签署的成品也可单独运行此验收。Windows SDK 和 NSIS 的相关接口见[微软 SignTool 文档](https://learn.microsoft.com/en-us/windows/win32/seccrypto/signtool)及 [NSIS 编译器文档](https://nsis.sourceforge.io/Docs/Chapter5.html#uninstfinalize)。
+
+版本变更时同步程序集、插件描述、场景包版本和使用手册。NSIS 从 `Directory.Build.props` 读取版本。通过检查后从干净检出构建安装包，从相同提交导出源码，记录提交、工具版本、SHA-256 与发布者签名状态。
