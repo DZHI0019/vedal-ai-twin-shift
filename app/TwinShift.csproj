@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>true</UseWindowsForms>
+    <AssemblyName>TwinShift</AssemblyName>
+    <RootNamespace>TwinShift</RootNamespace>
+    <ApplicationIcon>../assets/twinshift.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Web.Extensions" />
+    <Reference Include="System.Web" />
+    <Compile Include="../shared/SignalBus.cs" Link="SignalBus.cs" />
+  </ItemGroup>
+</Project>
