@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1, "id": "twin-shift.evo", "name": "Vedal AI · Evo",
-  "brandSubtitle": "非官方同人主题", "tagline": "Evil Neuro · Basement Radio",
+  "schemaVersion": 1, "id": "twin-shift.evo", "name": "Vedal AI · 月之暗面",
+  "brandSubtitle": "非官方同人主题", "tagline": "Evo · 地下室",
   "image": "background.jpg", "appearance": "dark",
   "art": {"focusX": 0.73, "focusY": 0.49, "safeArea": "left", "taskMode": "ambient"},
   "colors": {
