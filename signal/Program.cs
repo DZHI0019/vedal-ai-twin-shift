@@ -57,7 +57,9 @@ namespace TwinShift
                     ms.Write(chunk, 0, n);
                 }
 
-                return new UTF8Encoding(false, true).GetString(ms.ToArray());
+                byte[] bytes = ms.ToArray();
+                int offset = bytes.Length >= 3 && bytes[0] == 0xEF && bytes[1] == 0xBB && bytes[2] == 0xBF ? 3 : 0;
+                return new UTF8Encoding(false, true).GetString(bytes, offset, bytes.Length - offset);
             }
         }
 
