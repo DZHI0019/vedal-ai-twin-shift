@@ -1,0 +1,1 @@
+{"name":"twin-shift-local","interface":{"displayName":"Twin Shift"},"plugins":[{"name":"twin-shift-events","source":{"source":"local","path":"./plugin"},"policy":{"installation":"AVAILABLE","authentication":"ON_INSTALL"},"category":"Productivity"}]}
