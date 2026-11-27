@@ -13,7 +13,6 @@ using System.Windows.Threading;
 using System.Web.Script.Serialization;
 using NAudio.CoreAudioApi;
 using System.Net;
-using System.Net.Http;
 using System.Windows.Automation;
 
 namespace TwinShift
@@ -141,16 +140,15 @@ namespace TwinShift
             finally { session?.Dispose(); }
         }
 
-        sealed class TestSource : HttpMessageHandler
+        sealed class OfflineProxy : IWebProxy
         {
-            public int Calls;
-            public HttpStatusCode Status = HttpStatusCode.ServiceUnavailable;
-            protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+            public int Attempts { get; private set; }
+            public ICredentials Credentials { get; set; }
+            public bool IsBypassed(Uri destination) => false;
+            public Uri GetProxy(Uri destination)
             {
-                Calls++;
-                var response = new HttpResponseMessage(Status) { Content = new ByteArrayContent(new byte[] { 0, 1 }) };
-                response.Content.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("audio/mpeg");
-                return Task.FromResult(response);
+                Attempts++;
+                throw new InvalidOperationException("Network access is disabled during offline playback tests.");
             }
         }
 
@@ -188,7 +186,12 @@ namespace TwinShift
                 Require(CodexDesktop.IsInstalledImage(Path.Combine(apps, package, "app", "ChatGPT.exe"), apps), "Packaged Codex");
                 Require(!CodexDesktop.IsInstalledImage(Path.Combine(apps, "ChatGPT", "app", "ChatGPT.exe"), apps), "Other product");
                 Require(!CodexDesktop.IsInstalledImage(Path.Combine(apps, "other", package, "app", "ChatGPT.exe"), apps), "Wrong install root");
-                Require(Preferences.Load(out _).Online == false, "Network default");
+                File.WriteAllText(Preferences.FileName, @"{""Version"":1,""Mode"":""evo"",""Volume"":73,""Online"":true}");
+                var legacy = Preferences.Load(out string legacyWarning);
+                Require(legacyWarning == "" && legacy.Volume == 73 && legacy.Mode == "evo", "Beta 3 preferences remain readable");
+                File.Delete(Preferences.FileName);
+                var offline = new OfflineProxy();
+                WebRequest.DefaultWebProxy = offline;
                 var app = new App();
                 app.InitializeComponent();
                 Pump(200);
@@ -243,21 +246,15 @@ namespace TwinShift
                 Require(copyEvo.Background == app.Resources["Accent"] && copyNeo.Background == app.Resources["Card"], "Evo primary action");
                 Shot(win, args[0], "evo");
                 var pref = new Preferences { Volume = 30 };
-                var source = new TestSource();
-                using (var unavailable = new AudioDeck(pref, new HttpClient(source)))
-                {
-                    string error = "";
-                    unavailable.Notice += s => error = s;
-                    Require(!Await(unavailable.Play("yay")) && source.Calls == 0, "Background network opt-out");
-                    Require(!Await(unavailable.Play("yay", true)) && source.Calls == 1 && error.Contains("网络"), "Unavailable source gives a retryable error");
-                    source.Status = HttpStatusCode.OK;
-                    Require(!Await(unavailable.Play("yay", true)) && error.Contains("已变化") && !unavailable.HasSessionClip(unavailable.Clips["yay"]), "Unverified bytes never played or cached");
-                }
                 using (var deck = new AudioDeck(pref))
                 using (var endpoints = new MMDeviceEnumerator())
                 {
                     Require(deck.Clips.Count == 8, "Eight cues");
-                    Require(!AudioDeck.Allowed("https://invalid.example/a.mp3"), "Host allowlist");
+                    foreach (var clip in deck.Clips.Values)
+                    {
+                        using (var decoded = VoiceOutput.Decode(AudioDeck.ReadBundled(clip), false, CancellationToken.None))
+                            Require(decoded.Length > 0 && decoded.TotalTime.TotalSeconds <= 10.1, "Installed audio decodes: " + clip.Id);
+                    }
                     byte[] wav = File.ReadAllBytes(Files.Asset("attention.wav"));
                     Require(AudioDeck.ValidWave(wav), "Valid PCM");
                     Require(!AudioDeck.ValidWave(wav.Take(40).ToArray()), "Truncated WAV");
@@ -290,37 +287,49 @@ namespace TwinShift
                     Require(!Await(deck.Play("win")) && message.Contains("WAV"), "Corrupt local copy gives a visible error");
                     deck.RemoveLocal(cue);
                     Require(!deck.HasLocal(cue), "Remove local");
-                    Require(!Await(deck.Play("win")) && !deck.HasSessionClip(cue), "No unsolicited network");
+                    string original = Path.Combine(Files.Base, "assets", "voices", cue.Id + ".mp3");
+                    byte[] bytes = File.ReadAllBytes(original);
+                    try
+                    {
+                        File.Delete(original);
+                        Require(!Await(deck.Play(cue.Id)) && message.Contains("找不到"), "Missing bundled recording is reported");
+                        File.WriteAllBytes(original, new byte[] { 0, 1, 2, 3 });
+                        Require(!Await(deck.Play(cue.Id)) && message.Contains("校验"), "Altered bundled recording is rejected");
+                        deck.Import(cue, Files.Asset("attention.wav"));
+                        if (measure)
+                            Require(Await(deck.Play(cue.Id)), "Personal WAV takes precedence over the damaged bundled file");
+                        deck.RemoveLocal(cue);
+                    }
+                    finally { File.WriteAllBytes(original, bytes); }
+
                     var nav = (StackPanel)win.FindName("Nav");
                     ((Button)nav.Children[1]).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                     Shot(win, args[0], "evo-voices");
                     ((Button)win.FindName("NeoButton")).RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
                     Shot(win, args[0], "neo-voices");
                     Shot(win, args[0], "neo-compact", 610, 440);
-                    if (args.Contains("--online"))
+                    if (measure)
                     {
                         deck.Notice += Console.WriteLine;
                         using (var device = endpoints.GetDefaultAudioEndpoint(DataFlow.Render, Role.Multimedia))
                         {
-                            var row = (Border)((StackPanel)win.FindName("VoiceRows")).Children[0];
-                            var preview = ((DockPanel)row.Child).Children.OfType<Button>().Single(b => AutomationProperties.GetName(b) == "联网试听 Neuro Yay!");
+                            var rows = (StackPanel)win.FindName("VoiceRows");
                             var stop = (Button)win.FindName("StopAudio");
-                            float clickPeak = MeasureOutput(() => preview.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)), () => !stop.IsEnabled, device);
-                            Require((string)preview.Content == "重播" && ((TextBlock)win.FindName("VoiceFeedback")).Text.Contains("已播完"), "Visible button reaches a verified completion");
-                            Require(!Preferences.Load(out _).Online, "Single click preserves background network preference");
-                            Console.WriteLine("PASS real WPF preview control, render-session peak " + clickPeak.ToString("0.0000"));
+                            var feedback = (TextBlock)win.FindName("VoiceFeedback");
+                            var buttons = rows.Children.OfType<Border>()
+                                .SelectMany(row => ((DockPanel)row.Child).Children.OfType<Button>()).ToList();
                             foreach (var clip in deck.Clips.Values)
                             {
-                                Task<bool> playing = null;
-                                float peak = MeasureOutput(() => playing = deck.Play(clip.Id, onlineOnce: true), () => playing.IsCompleted, device);
-                                Require(Await(playing) && deck.HasSessionClip(clip) && !pref.Online, "Single-cue preview: " + clip.Id + " " + message);
-                                Console.WriteLine("PASS " + clip.Id + " render-session peak " + peak.ToString("0.0000"));
+                                var play = buttons.Single(b => AutomationProperties.GetName(b) == "播放 " + clip.Speaker + " " + clip.Line);
+                                Require(AutomationProperties.GetHelpText(play).Contains(clip.Translation), "Accessible translation");
+                                float peak = MeasureOutput(() => play.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)), () => !stop.IsEnabled, device);
+                                Require(feedback.Text == "已播完 · " + clip.Speaker + " · " + clip.Line, "Playback completion: " + clip.Id);
+                                Console.WriteLine("PASS offline WPF play " + clip.Id + ", render-session peak " + peak.ToString("0.0000"));
                             }
-                            Require(Await(deck.Play(cue.Id)), "Offline session replay");
                         }
-                        deck.ClearOnline();
-                        Require(!deck.HasSessionClip(cue) && !Directory.Exists(Path.Combine(SignalBus.Root, "preview-cache")), "No online audio persisted");
                     }
+                    Require(offline.Attempts == 0, "No HTTP requests during first-use playback");
+                    Require(!Directory.Exists(Path.Combine(SignalBus.Root, "preview-cache")), "No runtime download cache");
                 }
 
                 if (args.Contains("--codex"))

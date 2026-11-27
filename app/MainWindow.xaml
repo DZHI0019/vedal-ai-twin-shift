@@ -37,7 +37,7 @@
        </Grid>
       </Border>
       <TextBlock Style="{StaticResource Heading}" Margin="0,16,0,2" Text="Codex 主窗口"/>
-      <TextBlock Style="{StaticResource Hint}" Text="先复制要用的主题，在 Codex「设置 → 外观」导入对应的浅色或深色槽。两槽都导入后可跟随系统。"/>
+      <TextBlock Style="{StaticResource Hint}" Text="在 Codex「设置 → 外观」导入对应主题。"/>
       <WrapPanel Margin="0,6,0,8">
        <Button x:Name="CopyNeo" Tag="neo-light" Click="CopyTheme" Content="复制月之亮面"/>
        <Button x:Name="CopyEvo" Tag="evo-dark" Click="CopyTheme" Content="复制月之暗面"/>
@@ -46,52 +46,47 @@
       <Border Style="{StaticResource Panel}"><StackPanel>
        <TextBlock FontWeight="SemiBold" Text="窗边装饰"/><ui:ToggleSwitch x:Name="BadgeToggle" Margin="0,9,0,4" Content="在 Codex 窗边显示 Vedal 小龟" Click="PreferenceClick"/>
        <ui:ToggleSwitch x:Name="MotionToggle" Margin="0,4,0,7" Content="减弱完成动效" Click="PreferenceClick"/>
-       <TextBlock Style="{StaticResource Hint}" Text="窄窗口自动收起值班牌。壁纸包可由 Dream Skin 导入；任务页降低画面强度，输入框与审批对话框保持实色。"/>
       </StackPanel></Border>
       <WrapPanel><Button Click="BackupTheme" Content="备份剪贴板中的原主题"/><Button Tag="light" Click="RestoreTheme" Content="复制浅色备份"/><Button Tag="dark" Click="RestoreTheme" Content="复制深色备份"/></WrapPanel>
      </StackPanel>
      <StackPanel x:Name="Voices" Visibility="Collapsed">
-      <TextBlock Style="{StaticResource Heading}" Text="角色原声"/>
-      <TextBlock Style="{StaticResource Hint}" Text="点「联网试听」只取这一句。更多菜单可导入本地 WAV 或查看出处。"/>
+      <TextBlock Style="{StaticResource Heading}" Text="角色语音"/>
       <Border Style="{StaticResource Panel}" Margin="0,14,0,12"><StackPanel>
-       <DockPanel><ui:SymbolIcon Symbol="Speaker224" FontSize="18" Margin="0,0,8,0" Foreground="{DynamicResource Accent}"/><TextBlock x:Name="VoiceFeedback" FontWeight="SemiBold" Text="选择一句试听" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite"/></DockPanel>
+       <DockPanel x:Name="VoiceStatusPanel" Visibility="Collapsed" Margin="0,0,0,5"><ui:SymbolIcon Symbol="Speaker224" FontSize="18" Margin="0,0,8,0" Foreground="{DynamicResource Accent}"/><TextBlock x:Name="VoiceFeedback" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" AutomationProperties.LiveSetting="Polite"/></DockPanel>
        <Grid Margin="0,6,0,5"><Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
         <TextBlock Text="音量" VerticalAlignment="Center"/><Slider x:Name="VolumeSlider" Grid.Column="1" Margin="12,0" Minimum="0" Maximum="100" TickFrequency="1" IsSnapToTickEnabled="True" ValueChanged="VolumeChanged" VerticalAlignment="Center" AutomationProperties.Name="角色音量"/>
         <TextBlock x:Name="VolumeText" MinWidth="35" TextAlignment="Right" Grid.Column="2" VerticalAlignment="Center"/><Button x:Name="StopAudio" Grid.Column="3" Margin="12,0,0,0" Click="StopClick" Content="停止" IsEnabled="False" AutomationProperties.Name="停止播放"/>
        </Grid>
-       <WrapPanel><ui:ToggleSwitch x:Name="AutoToggle" Margin="0,7,20,3" Content="测试结果自动播放" Click="PreferenceClick"/><ui:ToggleSwitch x:Name="OnlineToggle" Margin="0,7,0,3" Content="允许后台联网取音" Click="PreferenceClick"/></WrapPanel>
+       <ui:ToggleSwitch x:Name="AutoToggle" Margin="0,6,0,0" Content="测试结果自动播放" Click="PreferenceClick"/>
       </StackPanel></Border>
       <Border Style="{StaticResource Panel}" Padding="14,1"><StackPanel x:Name="VoiceRows"/></Border>
      </StackPanel>
      <StackPanel x:Name="Activity" Visibility="Collapsed">
       <TextBlock Style="{StaticResource Heading}" Text="任务反馈"/>
-      <TextBlock Style="{StaticResource Hint}" Text="接收本机已信任的 Codex 事件。记录只存在本次运行中；短标识用于区分不同聊天。"/>
       <WrapPanel><ui:ToggleSwitch x:Name="AttentionToggle" Margin="0,7,18,7" Content="审批与提问时轻响一声" Click="PreferenceClick"/><ui:ToggleSwitch x:Name="MuteToggle" Margin="0,7" Content="暂停自动声音" Click="PreferenceClick"/></WrapPanel>
-      <Border Style="{StaticResource Panel}"><StackPanel><TextBlock x:Name="LastTitle" Text="等待任务事件" FontWeight="SemiBold"/><TextBlock x:Name="LastDetail" Style="{StaticResource Hint}" Text="可在「接入」启用插件，之后普通工作不会弹出这个面板。"/><WrapPanel x:Name="ResultActions"/></StackPanel></Border>
+      <Border Style="{StaticResource Panel}"><StackPanel><TextBlock x:Name="LastTitle" Text="等待任务事件" FontWeight="SemiBold"/><TextBlock x:Name="LastDetail" Style="{StaticResource Hint}" Visibility="Collapsed"/><WrapPanel x:Name="ResultActions"/></StackPanel></Border>
       <StackPanel x:Name="History"/>
      </StackPanel>
      <StackPanel x:Name="Setup" Visibility="Collapsed">
       <TextBlock Style="{StaticResource Heading}" Text="接入与恢复"/>
       <Border Style="{StaticResource Panel}"><StackPanel><TextBlock FontWeight="SemiBold" Text="连接 Codex 任务事件"/>
-       <TextBlock Style="{StaticResource Hint}" Text="使用 Codex 自带的本地插件市场。启用后在 Codex「设置 → Hooks」审阅钩子，再打开新聊天。此操作适用于当前 Windows 用户。"/>
+       <TextBlock Style="{StaticResource Hint}" Text="启用后，在 Codex「设置 → Hooks」审阅，再打开新聊天。"/>
        <WrapPanel><Button x:Name="EnablePlugin" Click="EnableClick" Content="启用事件插件"/><Button x:Name="DisablePlugin" Click="DisableClick" Content="停用并移除插件"/></WrapPanel>
       </StackPanel></Border>
       <Border Style="{StaticResource Panel}"><StackPanel><TextBlock FontWeight="SemiBold" Text="安装和恢复背景"/>
-       <TextBlock Style="{StaticResource Hint}" Text="在 Dream Skin 的 Import Theme ZIP 分别导入两个包，在 Saved Themes 选择班次。恢复时先保存工作，再使用宿主的 Restore，完全退出后从官方入口重开 Codex。此宿主使用本机调试连接。"/>
+       <TextBlock Style="{StaticResource Hint}" Text="在 Dream Skin 中导入壁纸 ZIP。还原前请保存工作。"/>
        <WrapPanel><Button Click="ShowScenes" Content="打开壁纸包目录"/><Button Click="OpenWallpaperRelease" Content="壁纸宿主官方发布页"/><Button Click="OpenGuide" Content="使用手册"/></WrapPanel>
-       <TextBlock Style="{StaticResource Hint}" Text="Dream Skin 1.5.21 可启用新版 Codex 标题栏着色。只更新壁纸宿主的三份界面资源，重新应用主题后生效。"/>
        <WrapPanel><Button Click="EnableWallpaperHeader" Content="适配新版标题栏"/><Button Click="RestoreWallpaperHeader" Content="还原宿主标题栏"/></WrapPanel>
       </StackPanel></Border>
       <Border Style="{StaticResource Panel}"><StackPanel><TextBlock FontWeight="SemiBold" Text="隐私与许可"/>
-       <TextBlock Style="{StaticResource Hint}" Text="无遥测。本机事件通道只传状态和短标识。角色录音的公开再分发须另行取得许可；可为每句导入有权使用的 WAV。"/>
        <WrapPanel><Button Click="OpenCredits" Content="素材与作者"/><Button Click="DefaultPrefs" Content="恢复控制台默认设置"/></WrapPanel>
       </StackPanel></Border>
      </StackPanel>
     </StackPanel>
    </ScrollViewer>
   </Grid>
-  <Border Grid.Row="2" Background="{DynamicResource Card}" BorderBrush="{DynamicResource Edge}" BorderThickness="0,1,0,0" Padding="13,6">
-   <DockPanel><TextBlock DockPanel.Dock="Right" x:Name="ShiftStatus" Style="{StaticResource Hint}" Margin="13,0,0,0"/><TextBlock x:Name="Feedback" Style="{StaticResource Hint}" AutomationProperties.LiveSetting="Polite" Text="准备就绪"/></DockPanel>
+  <Border x:Name="Footer" Visibility="Collapsed" Grid.Row="2" Background="{DynamicResource Card}" BorderBrush="{DynamicResource Edge}" BorderThickness="0,1,0,0" Padding="13,6">
+   <TextBlock x:Name="Feedback" TextWrapping="Wrap" AutomationProperties.LiveSetting="Polite"/>
   </Border>
  </Grid>
 </Window>

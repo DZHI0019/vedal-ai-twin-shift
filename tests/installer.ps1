@@ -36,10 +36,17 @@ try {
     foreach($file in @('TwinShift.exe','portable.install','使用手册.html','marketplace/.agents/plugins/marketplace.json','marketplace/plugin/hooks/TwinSignal.exe','scenes/TwinShift-neo.zip','scenes/TwinShift-evo.zip')){
         if(!(Test-Path (Join-Path $target $file))){throw "Missing payload $file"}
     }
+    $voices = Join-Path $target 'assets/voices'
+    $cues = @(Get-Content -Raw -Encoding utf8 -LiteralPath (Join-Path $target 'assets/voices.json') | ConvertFrom-Json)
+    if ($cues.Count -ne 8 -or @(Get-ChildItem -File -LiteralPath $voices).Count -ne 8) { throw 'Incomplete offline voice pack' }
+    foreach ($cue in $cues) {
+        if ((Get-FileHash -LiteralPath (Join-Path $voices ($cue.Id + '.mp3'))).Hash -ne $cue.Sha256) { throw 'Installed voice checksum mismatch' }
+    }
     [IO.File]::WriteAllText((Join-Path $target 'personal.txt'),'keep')
     [IO.File]::WriteAllText((Join-Path $env:TWINSHIFT_DATA_DIR 'backup-light.txt'),'backup')
     Execute $setup "/S /PORTABLE /D=$target" 0
     Execute (Join-Path $target 'Uninstall.exe') "/S _?=$target" 0
+    if (Test-Path -LiteralPath $voices) { throw 'Uninstall left bundled recordings behind' }
     if((Test-Path (Join-Path $target 'TwinShift.exe')) -or (Test-Path (Join-Path $target 'twinshift.install'))){throw 'Uninstall left installed payload'}
     if([IO.File]::ReadAllText((Join-Path $target 'personal.txt')) -ne 'keep' -or [IO.File]::ReadAllText((Join-Path $env:TWINSHIFT_DATA_DIR 'backup-light.txt')) -ne 'backup'){throw 'User file lost'}
     Write-Output "PASS foreign directory refusal, portable installation, reinstall and uninstall with user files preserved."

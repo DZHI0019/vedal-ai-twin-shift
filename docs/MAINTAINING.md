@@ -8,7 +8,7 @@
 | 壁纸、输入框、侧栏、对话框 | `scenes/`、`assets/neo.jpg`、`assets/evo.jpg`、`tools/build_scenes.py` | 用固定版本 Dream Skin 验证器和 Windows 导入器。相同输入两次构建应得到相同 ZIP 哈希。 |
 | 装饰与偏好 | `app/MainWindow.xaml`、`MainWindow.xaml.cs`、`BadgeWindow.cs`、`Glyph.cs`、`LocalState.cs` | 亮、暗、高对比度、减弱动效、窄窗、前台切换和恢复偏好。新增偏好应有适用于旧文件的默认值。 |
 | 宿主事件 | `plugin/hooks/hooks.json`、`signal/Program.cs`、`shared/SignalBus.cs`、`app/Receiver.cs` | 首先检查 Codex 真正返回的载荷。覆盖正常、失败、超时、重复、空套件与无法分类的输出。 |
-| 语音及来源 | `assets/voices.json`、`app/AudioDeck.cs`、`app/VoiceOutput.cs` | 核对角色、语义、原片、剪辑整理者、授权范围、内容哈希、时长和相对响度。运行联网与离线测试。 |
+| 语音及来源 | `assets/voices.json`、`app/AudioDeck.cs`、`app/VoiceOutput.cs` | 核对角色、语义、原片、剪辑整理者、授权范围、内容哈希、时长和相对响度。核对离线首播、文件缺失、校验失败和自选 WAV 优先级。 |
 | 安装和升级 | `tools/build.ps1`、`packaging/TwinShift.nsi`、`app/PluginManager.cs` | 包文件清单、无管理员安装、覆盖升级、外来目录拒绝、卸载与保留用户数据。 |
 
 ## 兼容基线
@@ -29,22 +29,24 @@ Codex 插件仅声明五类异步命令钩子。Windows 默认命令解释器展
 
 普通 Stop 表示回合结束。只有受支持的独立 Playwright 或 node:test 命令及其可识别的完整报告，才构成测试结果反馈。已知退出码与报告冲突时保持安静。后台尚在运行、命令链、测试发现与零测试均不得报喜。审批仅提示，无论是否开启语音，都需要用户在 Codex 决定。一次普通结束紧随测试时，刚完成的结果会短暂留在面板中。自定义 Hooks 解释器、第三方测试脚本和其他报告器需另外适配。
 
-线上语音按固定 HTTPS 地址读取，关闭重定向、Cookies 和自动凭据；启用 Windows 网络配置或显式代理时同样校验内容 SHA-256。上游替换片段会中断相应试听。确认出处、剪辑和权利后方可更新该项。新的录音默认只添加出处和校验值。不要把用户自选音频、下载缓存、项目路径、真实事件载荷或聊天记录提交到仓库。
+八句语音在 `assets/voices/`，文件名为目录中的固定 ID。构建、安装测试和运行时均核对 SHA-256。替换公开版素材时同步逐句来源、许可、时长和文件摘要。自选 WAV 存在个人数据目录，不进入公共源码和安装包。
+
+普通构建直接使用提交的 MP3。重新制作公开配音时，在独立 Python 3.11+ 环境安装 `kokoro-onnx==0.4.9`、准备 FFmpeg/libmp3lame，从 [转换器的固定版本](https://github.com/thewh1teagle/kokoro-onnx/releases/tag/model-files-v1.0) 获取 `kokoro-v1.0.int8.onnx`、`voices-v1.0.bin`，运行 `python tools/render_voices.py <模型路径> <声音库路径>`。脚本核对模型和音色库摘要。审核新音频后一起提交 MP3 和目录。
 
 ## 复验与发行
 
-以下命令都从仓库根目录运行。基本测试只需要本机组件；两个开关分别启用八段真实片源校验和临时配置中的官方 CLI 检查。后者可在已安装 Codex 的开发机运行。测试将结果与原生窗口截图写进独立临时目录。
+基础测试在全新本地配置中解码八个随包文件。开发机有可用的 Windows 音频输出时，加 `-CheckAudioOutput` 逐一触发原生播放按钮并检查各自的输出电平。`-CheckCodex` 使用隔离的 CLI 配置。
 
 ```powershell
 ./tools/build.ps1
-./tools/test.ps1 -CheckVoiceSources -CheckAudioOutput -CheckCodex -WallpaperEngine ../Codex-Dream-Skin/windows
+./tools/test.ps1 -CheckAudioOutput -CheckCodex -WallpaperEngine ../Codex-Dream-Skin/windows
 node ./tests/host-hooks.mjs ./out/app
 ./tools/build.ps1 -DreamValidator ../Codex-Dream-Skin/runtime/theme-package-validator.mjs -MakeNSIS 'C:\Program Files (x86)\NSIS\makensis.exe'
 ./tests/dream-skin.ps1 -UpstreamRoot ../Codex-Dream-Skin
-./tests/installer.ps1 -Installer ./out/TwinShift-1.1.0-beta.3-Setup.exe
+./tests/installer.ps1 -Installer ./out/TwinShift-1.1.0-beta.4-Setup.exe
 ```
 
-Dream Skin 源码应固定到 v1.5.21，Windows 导入器需要上游认可的签名 Node.js。CI 包含编译、原生窗口、离线音频、事件通道和配色验证。发布前在隔离桌面配置导入两槽和两图，核对审批控件可点击、变更可读、可还原；使用物理音箱时再复查相对音量。联网素材回访与用户桌面视觉验收单独进行。
+Dream Skin 源码应固定到 v1.5.21，Windows 导入器需要上游认可的签名 Node.js。CI 包含编译、原生窗口、离线音频、事件通道和配色验证。发布前在隔离桌面配置导入两槽和两图，核对审批控件可点击、变更可读、可还原；使用物理音箱时再复查相对音量。在用户桌面另行核对视觉效果。
 
 ### 标题栏与隔离实例
 

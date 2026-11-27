@@ -78,7 +78,6 @@ namespace TwinShift
         public int Volume { get; set; } = 60;
         public bool AutoVoice { get; set; }
         public bool Attention { get; set; }
-        public bool Online { get; set; }
         public bool Badge { get; set; }
         public bool Muted { get; set; }
         public bool QuietMotion { get; set; }
@@ -136,7 +135,6 @@ namespace TwinShift
         public string Slot { get; set; }
         public double Seconds { get; set; }
         public double Gain { get; set; }
-        public string Url { get; set; }
         public string Sha256 { get; set; }
         public string Source { get; set; }
         public string Credit { get; set; }

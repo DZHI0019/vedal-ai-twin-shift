@@ -5,12 +5,11 @@
     "Line": "Yay!",
     "Translation": "耶！",
     "Slot": "测试通过",
-    "Seconds": 0.82,
-    "Gain": 0.611,
-    "Url": "https://minhtridotnet.github.io/neuro-sama-soundboard/Sounds/Neuro-sama%20Yay.mp3",
-    "Source": "https://www.youtube.com/watch?v=UpWBjIvQLts&t=103s",
-    "Credit": "minhtridotnet 音板",
-    "Sha256": "898b7102a404364138a34158aed2af3e9ae1b3fe2aabda4ce77e26b04a49cc30"
+    "Seconds": 0.5,
+    "Gain": 1,
+    "Source": "https://huggingface.co/hexgrad/Kokoro-82M",
+    "Credit": "同人合成配音 · Kokoro af_bella",
+    "Sha256": "74eb5ef37da5b335aee5fa796b8faa6f86bcc32c8d411ce862a944285e6723a1"
   },
   {
     "Id": "win",
@@ -18,12 +17,11 @@
     "Line": "I win? Let’s go!",
     "Translation": "我赢了？走起！",
     "Slot": "测试通过",
-    "Seconds": 2.31,
-    "Gain": 0.764,
-    "Url": "https://storage.neurokaraoke.com/soundbites/Evil/e041741c-f74b-4ffd-ae3d-8d5b96abff15.mp3",
-    "Source": "https://www.youtube.com/watch?v=dPp6tG1nbtQ&t=2987s",
-    "Credit": "NeuroKaraoke 社区剪辑",
-    "Sha256": "a6fd9cdf67f4655017a7c99e9d5175c036defe0aeac426b1639660464e60cc04"
+    "Seconds": 1.31,
+    "Gain": 1,
+    "Source": "https://huggingface.co/hexgrad/Kokoro-82M",
+    "Credit": "同人合成配音 · Kokoro af_heart",
+    "Sha256": "44dde6d6917a45bdb1894529561d6e4304c68071247b77f71c5eb3c3266de50b"
   },
   {
     "Id": "filtered",
@@ -31,12 +29,11 @@
     "Line": "Filtered.",
     "Translation": "被过滤了。",
     "Slot": "拒绝命令后 · 手动",
-    "Seconds": 1.32,
-    "Gain": 0.813,
-    "Url": "https://storage.neurokaraoke.com/soundbites/Neuro/f42c7ea9-2e6e-40f8-b6c0-fc2ad41eaa07.mp3",
-    "Source": "https://api.neurokaraoke.com/api/soundbites/f42c7ea9-2e6e-40f8-b6c0-fc2ad41eaa07",
-    "Credit": "NeuroKaraoke 社区剪辑",
-    "Sha256": "ed8434bf84acde49b5170007be976bdd10b38b1ef389f397e31fe0c147b58ce1"
+    "Seconds": 0.69,
+    "Gain": 1,
+    "Source": "https://huggingface.co/hexgrad/Kokoro-82M",
+    "Credit": "同人合成配音 · Kokoro af_bella",
+    "Sha256": "eb5763e8538b1bc63369cd6c419383993fe6da362d56d5252423c09f025dc2fd"
   },
   {
     "Id": "help",
@@ -44,12 +41,11 @@
     "Line": "Someone tell Vedal there is a problem with my AI.",
     "Translation": "谁去告诉 Vedal，我的 AI 出问题了。",
     "Slot": "连接中断 · 手动",
-    "Seconds": 3.2,
-    "Gain": 0.689,
-    "Url": "https://minhtridotnet.github.io/neuro-sama-soundboard/Sounds/Neuro-sama%20Someone%20tell%20Vedal%20there%20is%20a%20problem%20with%20my%20AI.mp3",
-    "Source": "https://www.youtube.com/watch?v=Gmr4WfHemTA",
-    "Credit": "minhtridotnet 音板",
-    "Sha256": "99a78ce79201f1df1edd4bfcdb684a1ebe3de16f4533bf3f0386c48a974f11c5"
+    "Seconds": 3.11,
+    "Gain": 1,
+    "Source": "https://huggingface.co/hexgrad/Kokoro-82M",
+    "Credit": "同人合成配音 · Kokoro af_bella",
+    "Sha256": "23b99c576618842a0ef7d7c0d9603994211fc58bd2bbee2fc906a855d5aa8e2b"
   },
   {
     "Id": "shucks",
@@ -57,12 +53,11 @@
     "Line": "Aww, shucks.",
     "Translation": "哎呀。",
     "Slot": "测试失败",
-    "Seconds": 1.18,
-    "Gain": 0.922,
-    "Url": "https://storage.neurokaraoke.com/soundbites/Evil/Evil_aww_shucks.mp3",
-    "Source": "https://api.neurokaraoke.com/api/soundbites/19d92cef-1456-4226-8640-7c974f76c233",
-    "Credit": "NeuroKaraoke 社区剪辑",
-    "Sha256": "ee0f3372b8153bb617e63ac180e600a35e3d5194c20f643a15193933e41be577"
+    "Seconds": 0.92,
+    "Gain": 1,
+    "Source": "https://huggingface.co/hexgrad/Kokoro-82M",
+    "Credit": "同人合成配音 · Kokoro af_heart",
+    "Sha256": "e2b76baaf281051c4cd6d5bd9efd4289ec9843546a3ab0e2a872686c48d58ddb"
   },
   {
     "Id": "pipes",
@@ -70,12 +65,11 @@
     "Line": "Let me play some pipes to celebrate.",
     "Translation": "让我敲几下管子庆祝。",
     "Slot": "月之暗面 · 管道庆功",
-    "Seconds": 3.32,
-    "Gain": 0.617,
-    "Url": "https://storage.neurokaraoke.com/soundbites/Evil/257f3068-1759-4d6d-9013-d69ee4c7c107.mp3",
-    "Source": "https://www.youtube.com/watch?v=hGtT4-MSzS0&t=1014s",
-    "Credit": "NeuroKaraoke 社区剪辑",
-    "Sha256": "045f4cd08f3683d2a980d8cda626919b091be73a097f87cc3a3b089902fbdf4d"
+    "Seconds": 1.93,
+    "Gain": 1,
+    "Source": "https://huggingface.co/hexgrad/Kokoro-82M",
+    "Credit": "同人合成配音 · Kokoro af_heart",
+    "Sha256": "b049678d34b3f950110ffd8af6aba78f522fd05529bc0a356d91d76d9de1a075"
   },
   {
     "Id": "tutel",
@@ -83,12 +77,11 @@
     "Line": "Tutel loves you all!",
     "Translation": "龟龟爱你们！",
     "Slot": "点侧栏小龟 · 手动",
-    "Seconds": 2,
-    "Gain": 0.616,
-    "Url": "https://storage.neurokaraoke.com/soundbites/Neuro/a5b0b1b5-729c-4975-a826-cf3839536f16.mp3",
-    "Source": "https://api.neurokaraoke.com/api/soundbites/a5b0b1b5-729c-4975-a826-cf3839536f16",
-    "Credit": "NeuroKaraoke 社区剪辑",
-    "Sha256": "fae8e6564468ee0b5c272568100899efeca74149bc02a170185748b1d58ab419"
+    "Seconds": 1.09,
+    "Gain": 1,
+    "Source": "https://huggingface.co/hexgrad/Kokoro-82M",
+    "Credit": "同人合成配音 · Kokoro af_bella",
+    "Sha256": "3d3488241b8f66299650fa54d7fe74c21b922bbffe8e947fb65f6d1cf24bbdc6"
   },
   {
     "Id": "vedal",
@@ -96,11 +89,10 @@
     "Line": "Good job. Vedal approved.",
     "Translation": "干得好。龟龟认可。",
     "Slot": "测试通过后点龟 · 手动",
-    "Seconds": 2.43,
+    "Seconds": 2.31,
     "Gain": 1,
-    "Url": "https://storage.neurokaraoke.com/soundbites/Vedal/Vedal_Good_job._Vedal_approved.mp3",
-    "Source": "https://www.youtube.com/watch?v=ogNCHXO2oAI&t=31967s",
-    "Credit": "NeuroKaraoke 社区剪辑",
-    "Sha256": "6b61fe706b691d3f51a025ee1b5c360e3a795cd39352b8300dd180fc9c9e7482"
+    "Source": "https://huggingface.co/hexgrad/Kokoro-82M",
+    "Credit": "同人合成配音 · Kokoro bm_george",
+    "Sha256": "52b1a39bb93796cda01c23ec4c5ce4cecfa668a6821512b02e4cf1bac3f78bb8"
   }
 ]

@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$ScratchRoot=[IO.Path]::GetTempPath(),[string]$InstalledRoot,[switch]$SkipRestore,[switch]$CheckVoiceSources,[switch]$CheckAudioOutput,[switch]$CheckCodex,[string]$WallpaperEngine)
+param([string]$ScratchRoot=[IO.Path]::GetTempPath(),[string]$InstalledRoot,[switch]$SkipRestore,[switch]$CheckAudioOutput,[switch]$CheckCodex,[string]$WallpaperEngine)
 $ErrorActionPreference='Stop'
 $root=(Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 if(!$InstalledRoot){$InstalledRoot=Join-Path $root 'out/app'}
@@ -18,8 +18,7 @@ $savedProfile=$env:CODEX_HOME
 try {
     $env:TWINSHIFT_DATA_DIR=Join-Path $run '本地录音 # %25'
     $env:CODEX_HOME=[IO.Directory]::CreateDirectory((Join-Path $run 'codex')).FullName
-    $options=@($shots)
-    if($CheckVoiceSources){$options+='--online'}
+    $options=@($shots,'--tray')
     if($CheckAudioOutput){$options+='--audio-output'}
     if($CheckCodex){$options+='--codex'}
     if($WallpaperEngine){$options+=@('--wallpaper-engine',(Resolve-Path -LiteralPath $WallpaperEngine).Path)}

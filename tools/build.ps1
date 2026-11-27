@@ -28,7 +28,7 @@ $sceneArgs=@((Join-Path $root 'tools/build_scenes.py'),'--out',(Join-Path $out '
 if($DreamValidator){$sceneArgs+=@('--validator',$DreamValidator)}
 & $Python @sceneArgs
 if($LASTEXITCODE){throw 'Scene validation failed'}
-$directories=@('assets','themes','scenes','marketplace/.agents/plugins','marketplace/plugin/.codex-plugin','marketplace/plugin/hooks')
+$directories=@('assets/voices','themes','scenes','marketplace/.agents/plugins','marketplace/plugin/.codex-plugin','marketplace/plugin/hooks')
 foreach($dir in $directories){[IO.Directory]::CreateDirectory((Join-Path $stage $dir)) | Out-Null}
 $files=@('app/bin/Release/net48/TwinShift.exe','app/bin/Release/net48/TwinShift.exe.config','LICENSE','docs/使用手册.html')
 foreach($file in $files){Stage-File (Join-Path $root $file) ([IO.Path]::GetFileName($file))}
@@ -38,6 +38,16 @@ $runtimeLibraries=@(
 )
 foreach($dll in $runtimeLibraries){Stage-File (Join-Path $root "app/bin/Release/net48/$dll") $dll}
 foreach($file in @('attention.wav','evo.jpg','neo.jpg','tutel.png','twinshift.ico','voices.json','NOTICE.md','TUTEL-LICENSE.md','DREAM-SKIN-LICENSE.txt','NAudio-LICENSE.txt','NLayer-LICENSE.txt','UI-LICENSES.txt')){Stage-File (Join-Path $root "assets/$file") "assets/$file"}
+$cues = @(Get-Content -Raw -Encoding utf8 -LiteralPath (Join-Path $stage 'assets/voices.json') | ConvertFrom-Json)
+$expectedIds = @('filtered','help','pipes','shucks','tutel','vedal','win','yay')
+if (($cues.Id | Sort-Object) -join ',' -cne ($expectedIds -join ',')) { throw 'Unexpected voice catalogue.' }
+foreach ($cue in $cues) {
+    $relative = 'assets/voices/' + $cue.Id + '.mp3'
+    Stage-File (Join-Path $root $relative) $relative
+    if ((Get-FileHash -LiteralPath (Join-Path $stage $relative)).Hash -ne $cue.Sha256) {
+        throw "Packaged recording differs from its catalogue entry: $($cue.Id)"
+    }
+}
 foreach($name in @('neo','evo')){Stage-File (Join-Path $out "scenes/TwinShift-$name.zip") "scenes/TwinShift-$name.zip"}
 foreach($name in @('neo-light','evo-dark')){Stage-File (Join-Path $root "themes/$name.txt") "themes/$name.txt"}
 foreach($file in @('.agents/plugins/marketplace.json','plugin/.codex-plugin/plugin.json','plugin/hooks/hooks.json')){Stage-File (Join-Path $root $file) "marketplace/$file"}

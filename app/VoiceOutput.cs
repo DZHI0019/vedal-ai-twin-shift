@@ -37,7 +37,7 @@ namespace TwinShift
             using (var mp3 = new MpegFile(compressed))
             {
                 if (mp3.Channels < 1 || mp3.Channels > 2 || mp3.SampleRate < 8000 || mp3.SampleRate > 96000)
-                    throw new InvalidDataException("线上片段的采样格式不受支持。");
+                    throw new InvalidDataException("内置语音的采样格式不受支持。");
                 var format = WaveFormat.CreateIeeeFloatWaveFormat(mp3.SampleRate, mp3.Channels);
                 using (var pcm = new MemoryStream())
                 {
@@ -49,12 +49,12 @@ namespace TwinShift
                         token.ThrowIfCancellationRequested();
                         int size = count * sizeof(float);
                         if (pcm.Length + size > format.AverageBytesPerSecond * 10L)
-                            throw new InvalidDataException("线上片段超过十秒。");
+                            throw new InvalidDataException("内置语音超过十秒。");
                         Buffer.BlockCopy(samples, 0, block, 0, size);
                         pcm.Write(block, 0, size);
                     }
                     if (pcm.Length == 0)
-                        throw new InvalidDataException("线上片段没有可播放的音频。");
+                        throw new InvalidDataException("内置语音没有可播放的音频。");
                     var source = new MemoryStream(pcm.GetBuffer(), 0, (int)pcm.Length, false);
                     return new RawSourceWaveStream(source, format);
                 }
