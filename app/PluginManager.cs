@@ -126,12 +126,12 @@ namespace TwinShift
                     throw new InvalidOperationException("安装包的本地市场不完整。");
                 if (registered != null && !same)
                     throw new InvalidOperationException("同名市场已指向其他目录。请先在 Codex 中确认并处理原有来源。");
-                if (!same && (await Run(exe, "plugin marketplace add \"" + marketRoot + "\"")).code != 0)
+                if (!same && (await Run(exe, "plugin marketplace add ./marketplace")).code != 0)
                     throw new InvalidOperationException("Codex 未能登记此市场。请在插件设置中检查市场来源或 CLI 版本。");
                 Files.AtomicText(marker, marketRoot);
                 if ((await Run(exe, "plugin add " + Plugin)).code != 0)
                     throw new InvalidOperationException("市场已登记，事件插件尚未启用。可以重试或在 Codex 插件页安装。");
-                return "已安装事件插件。在 Codex 的 Hooks 设置中审阅并信任，然后打开新聊天。";
+                return "已安装事件插件。在 Codex「设置 → 钩子」审阅后，打开新聊天。";
             }
 
             if (!owns)

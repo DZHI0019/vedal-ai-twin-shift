@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
@@ -50,11 +51,13 @@ namespace TwinShift
         readonly Border frame;
         readonly Glyph chip;
         readonly WindowScene scene = new WindowScene();
+        readonly PreviewPanel preview = new PreviewPanel();
         string sceneError;
         internal event Action<string> SceneFailed;
         IntPtr cachedHandle;
         uint cachedPid;
         bool eligible;
+        bool checkingPreview;
         internal BadgeWindow(Preferences prefs, Process target, Action click, Action panel)
         {
             this.prefs = prefs;
@@ -150,7 +153,7 @@ namespace TwinShift
             chip.BeginAnimation(OpacityProperty, new DoubleAnimation(.35, 1, TimeSpan.FromMilliseconds(300)) { FillBehavior = FillBehavior.Stop });
         }
 
-        void Track()
+        async void Track()
         {
             try
             {
@@ -180,12 +183,20 @@ namespace TwinShift
                 if (prefs.WindowScene)
                 {
                     if (IsVisible) Hide();
-                    if (eligible)
+                    if (!eligible)
                     {
-                        scene.Present(main, WindowScene.IsNight(main, prefs), prefs.Badge);
-                        sceneError = null;
+                        scene.Hide();
+                        return;
                     }
-                    else scene.Hide();
+                    if (scene.Parent != main) scene.Hide();
+                    if (checkingPreview) return;
+                    checkingPreview = true;
+                    bool allowed;
+                    try { allowed = await Task.Run(() => preview.AllowsArtwork(main)); }
+                    finally { checkingPreview = false; }
+                    if (!tracker.IsEnabled || !prefs.WindowScene || GetForegroundWindow() != main) return;
+                    scene.Present(main, WindowScene.IsNight(main, prefs), prefs.Badge, allowed);
+                    sceneError = null;
                     return;
                 }
                 if (!eligible || !GetWindowRect(main, out var r))

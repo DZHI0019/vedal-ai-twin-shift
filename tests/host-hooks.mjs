@@ -12,12 +12,12 @@ mkdirSync(profile);
 const env = { ...process.env, CODEX_HOME: profile, TWINSHIFT_DATA_DIR: path.join(scratch, 'app-data') };
 const cli = process.env.TWINSHIFT_CODEX_EXE ?? 'codex.exe';
 const id = 'twin-shift-events@twin-shift-local';
-function run(...args) {
-  return execFileSync(cli, args, { cwd: scratch, env, encoding: 'utf8', windowsHide: true, timeout: 30000 });
+function run(cwd, ...args) {
+  return execFileSync(cli, args, { cwd, env, encoding: 'utf8', windowsHide: true, timeout: 30000 });
 }
-run('plugin', 'marketplace', 'add', path.join(installRoot, 'marketplace'));
+run(installRoot, 'plugin', 'marketplace', 'add', './marketplace');
 try {
-  run('plugin', 'add', id);
+  run(scratch, 'plugin', 'add', id);
   const proc = spawn(cli, ['app-server', '--stdio'], { cwd: scratch, env, stdio: ['pipe', 'pipe', 'ignore'], windowsHide: true });
   const waiting = new Map();
   const lines = createInterface({ input: proc.stdout });
@@ -39,7 +39,7 @@ try {
     });
   }
   try {
-    await request(1, 'initialize', { clientInfo: { name: 'twinshift_checks', title: 'Twin Shift checks', version: '1.1.0-beta.8' }, capabilities: { experimentalApi: true } });
+    await request(1, 'initialize', { clientInfo: { name: 'twinshift_checks', title: 'Twin Shift checks', version: '1.1.0-beta.9' }, capabilities: { experimentalApi: true } });
     send({ method: 'initialized' });
     const result = await request(2, 'hooks/list', { cwds: [scratch] });
     const entries = result.data.flatMap(row => {
@@ -54,5 +54,5 @@ try {
     proc.kill();
   }
 } finally {
-  try { run('plugin', 'remove', id); } finally { run('plugin', 'marketplace', 'remove', 'twin-shift-local'); }
+  try { run(scratch, 'plugin', 'remove', id); } finally { run(scratch, 'plugin', 'marketplace', 'remove', 'twin-shift-local'); }
 }

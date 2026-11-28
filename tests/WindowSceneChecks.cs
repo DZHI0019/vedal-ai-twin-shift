@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -20,6 +21,8 @@ namespace TwinShift
         [DllImport("user32.dll")] static extern IntPtr WindowFromPoint(Point pt);
         [DllImport("user32.dll")] static extern bool ClientToScreen(IntPtr window, ref Point pt);
         [DllImport("user32.dll")] static extern bool GetClientRect(IntPtr window, out BadgeWindow.Rect rect);
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern int GetClassName(IntPtr window, StringBuilder buffer, int length);
+        [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr window, out uint process);
         [DllImport("user32.dll")] static extern IntPtr GetDC(IntPtr window);
         [DllImport("user32.dll")] static extern int ReleaseDC(IntPtr window, IntPtr dc);
         [DllImport("gdi32.dll")] static extern uint GetPixel(IntPtr dc, int x, int y);
@@ -100,7 +103,15 @@ namespace TwinShift
                     var pt = new Point { X = (int)(size.Right * (.76 + i % 3 * .06)), Y = (int)(size.Bottom * (.31 + i / 3 * .07)) };
                     ClientToScreen(parent, ref pt);
                     var hit = WindowFromPoint(pt);
-                    if (hit == layer || GetAncestor(hit, 2) != parent) throw new Exception("Scene covered the input target or the test surface is occluded.");
+                    if (layer != IntPtr.Zero && hit == layer) throw new Exception("The artwork intercepted input at fixture sample " + i);
+                    if (hit == IntPtr.Zero || GetAncestor(hit, 2) != parent)
+                    {
+                        var kind = new StringBuilder(96);
+                        GetClassName(hit, kind, kind.Capacity);
+                        GetWindowThreadProcessId(parent, out uint fixturePid);
+                        GetWindowThreadProcessId(GetAncestor(hit, 2), out uint topPid);
+                        throw new Exception($"Fixture sample {i} at {pt.X},{pt.Y} (client {size.Right}×{size.Bottom}) hit '{kind}', fixture PID {fixturePid}, hit root PID {topPid}.");
+                    }
                     uint pixel = GetPixel(dc, pt.X, pt.Y);
                     if (pixel == uint.MaxValue) throw new Exception("Cannot sample test desktop.");
                     output[i] = pixel;

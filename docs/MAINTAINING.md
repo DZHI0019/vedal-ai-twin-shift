@@ -5,7 +5,7 @@
 | 修改内容 | 维护位置 | 需要复验 |
 | --- | --- | --- |
 | 原生主题和 diff 配色 | `themes/*.json` 是源，`*.txt` 是 Codex 可粘贴的分享格式 | 重建单行分享文本，运行 `node --test themes/theme.test.mjs`。需同时检查两槽、错误槽和对比度。 |
-| 日常窗口场景 | `app/SceneArtwork.cs`、`app/WindowScene.cs`、`app/BadgeWindow.cs` | 在硬件加速的 Chromium 窗口检查两幅插画、点击穿透、拖动和还原。 |
+| 日常窗口场景 | `app/SceneArtwork.cs`、`app/WindowScene.cs`、`app/PreviewPanel.cs`、`app/BadgeWindow.cs` | 在硬件加速的 Chromium 窗口检查两幅插画、点击穿透、拖动和还原。同一张照片在分栏和全宽预览中应保持原色。 |
 | Dream Skin 输入框、侧栏、对话框 | `scenes/`、`assets/neo.jpg`、`assets/evo.jpg`、`tools/build_scenes.py` | 用固定版本 Dream Skin 验证器和 Windows 导入器。相同输入两次构建应得到相同 ZIP 哈希。 |
 | 装饰与偏好 | `app/MainWindow.xaml`、`MainWindow.xaml.cs`、`BadgeWindow.cs`、`Glyph.cs`、`LocalState.cs` | 亮、暗、高对比度、减弱动效、窄窗、前台切换和恢复偏好。新增偏好应有适用于旧文件的默认值。 |
 | 宿主事件 | `plugin/hooks/hooks.json`、`signal/Program.cs`、`shared/SignalBus.cs`、`app/Receiver.cs` | 首先检查 Codex 真正返回的载荷。覆盖正常、失败、超时、重复、空套件与无法分类的输出。 |
@@ -42,7 +42,7 @@ Codex 插件仅声明五类异步命令钩子。Windows 默认命令解释器展
 node ./tests/host-hooks.mjs ./out/app
 ./tools/build.ps1 -DreamValidator ../Codex-Dream-Skin/runtime/theme-package-validator.mjs -MakeNSIS 'C:\Program Files (x86)\NSIS\makensis.exe'
 ./tests/dream-skin.ps1 -UpstreamRoot ../Codex-Dream-Skin
-./tests/installer.ps1 -Installer ./out/TwinShift-1.1.0-beta.8-Setup.exe
+./tests/installer.ps1 -Installer ./out/TwinShift-1.1.0-beta.9-Setup.exe
 ```
 
 在已登录 Windows 桌面上运行 `-CheckWindowScene`，需有开启硬件加速的 Chrome 或 Edge。测试在独立配置中打开本地纯色页，检查两种场景实际改变像素，并验证鼠标命中原窗口。

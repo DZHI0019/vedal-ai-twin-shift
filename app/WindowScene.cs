@@ -92,9 +92,10 @@ namespace TwinShift
                 Math.Round(dip.Width * scale), Math.Round(dip.Height * scale));
         }
 
-        internal void Present(IntPtr parent, bool night, bool showTurtle)
+        internal void Present(IntPtr parent, bool night, bool showTurtle, bool artworkAllowed = true)
         {
             if (!IsWindow(parent)) { Dispose(); return; }
+            if (!artworkAllowed) { Hide(); return; }
             var pixels = ScreenPlacement(parent);
             if (pixels.IsEmpty) { Hide(); return; }
             if (Parent != parent)
