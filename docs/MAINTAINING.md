@@ -5,7 +5,7 @@
 | 修改内容 | 维护位置 | 需要复验 |
 | --- | --- | --- |
 | 原生主题和 diff 配色 | `themes/*.json` 是源，`*.txt` 是 Codex 可粘贴的分享格式 | 重建单行分享文本，运行 `node --test themes/theme.test.mjs`。需同时检查两槽、错误槽和对比度。 |
-| 日常窗口场景 | `app/WindowScene.cs`、`app/BadgeWindow.cs` | 检查子窗口归属、DPI、鼠标穿透和两套插画。 |
+| 日常窗口场景 | `app/WindowScene.cs`、`app/BadgeWindow.cs` | 在硬件加速的 Chromium 窗口检查两幅插画、点击穿透、拖动和还原。 |
 | Dream Skin 输入框、侧栏、对话框 | `scenes/`、`assets/neo.jpg`、`assets/evo.jpg`、`tools/build_scenes.py` | 用固定版本 Dream Skin 验证器和 Windows 导入器。相同输入两次构建应得到相同 ZIP 哈希。 |
 | 装饰与偏好 | `app/MainWindow.xaml`、`MainWindow.xaml.cs`、`BadgeWindow.cs`、`Glyph.cs`、`LocalState.cs` | 亮、暗、高对比度、减弱动效、窄窗、前台切换和恢复偏好。新增偏好应有适用于旧文件的默认值。 |
 | 宿主事件 | `plugin/hooks/hooks.json`、`signal/Program.cs`、`shared/SignalBus.cs`、`app/Receiver.cs` | 首先检查 Codex 真正返回的载荷。覆盖正常、失败、超时、重复、空套件与无法分类的输出。 |
@@ -20,7 +20,7 @@ neuro 的主操作取龟壳的苔绿 `#5D7559`，正文和随文字着色的刻�
 
 在上述桌面版本中，`/status` 的用量条由实心与浅色块字符组成，实际宽度决定段数。用量菜单另有百分比和重置时间。Dream Skin 1.5.21 的安全 CSS 部件包含输入框和工具栏，没有独立用量条或发送按钮选择器。主窗口通过原生前景和场景强调色着色，避免全局按钮规则影响警告或审批。检查新客户端时，分别看宽窗、窄窗和系统高对比度。
 
-本版对照 Windows Codex 桌面版 26.1120.6357.0，配套 CLI 为 0.171.0-alpha.13.2。配色走设置页导入；项目在该版本实际解析器上检查了标准化结果、非法色值和槽位错误。日常窗口中的插画由 WindowScene 挂在 Codex 的 Windows 子窗口上，按客户区大小布局。另提供适配 Dream Skin 1.5.21 的场景包。控制台和事件接收仅在 Windows 上提供。将来宿主修改内部布局时，应先验证原生配色，再判断是否需要升级可选壁纸包。[Codex 外观设置](https://learn.chatgpt.com/docs/reference/settings#appearance) · [Dream Skin 验证器](https://github.com/Fei-Away/Codex-Dream-Skin/blob/v1.5.21/runtime/theme-package-validator.mjs)
+本版对照 Windows Codex 桌面版 26.1120.6357.0，配套 CLI 为 0.171.0-alpha.13.2。配色走设置页导入；项目在该版本实际解析器上检查了标准化结果、非法色值和槽位错误。WindowScene 使用由当前 Codex 主窗口拥有的透明工具窗。Windows 将其与 Chromium 的 GPU 表面合成。装饰靠客户区定位，随主窗口移动，失去前台时收起。另提供适配 Dream Skin 1.5.21 的场景包。控制台和事件接收仅在 Windows 上提供。将来宿主修改内部布局时，应先验证原生配色，再判断是否需要升级可选壁纸包。[Codex 外观设置](https://learn.chatgpt.com/docs/reference/settings#appearance) · [Dream Skin 验证器](https://github.com/Fei-Away/Codex-Dream-Skin/blob/v1.5.21/runtime/theme-package-validator.mjs)
 
 Closure-Codex 的装饰样式、色板和独立预览测试是这套设计的参照。这里沿用按事件区分语音的做法，复用 Dream Skin 的限定 CSS 和 ZIP 校验。Get Codex Theme 的主页、任务页和窄窗案例也可用于复查。自己的发布包仅含本项目的程序和已列入署名表的素材。[Closure-Codex 装饰实现](https://github.com/OndoP3901/Closure-Codex/tree/main/outputs/closure-decoration) · [Get Codex Theme](https://github.com/ViisOpen/get-codex-theme) · [Dream Skin 安全说明](https://github.com/Fei-Away/Codex-Dream-Skin/blob/v1.5.21/SECURITY.md)
 
@@ -38,12 +38,14 @@ Codex 插件仅声明五类异步命令钩子。Windows 默认命令解释器展
 
 ```powershell
 ./tools/build.ps1
-./tools/test.ps1 -CheckAudioOutput -CheckCodex -WallpaperEngine ../Codex-Dream-Skin/windows
+./tools/test.ps1 -CheckWindowScene -CheckAudioOutput -CheckCodex -WallpaperEngine ../Codex-Dream-Skin/windows
 node ./tests/host-hooks.mjs ./out/app
 ./tools/build.ps1 -DreamValidator ../Codex-Dream-Skin/runtime/theme-package-validator.mjs -MakeNSIS 'C:\Program Files (x86)\NSIS\makensis.exe'
 ./tests/dream-skin.ps1 -UpstreamRoot ../Codex-Dream-Skin
-./tests/installer.ps1 -Installer ./out/TwinShift-1.1.0-beta.6-Setup.exe
+./tests/installer.ps1 -Installer ./out/TwinShift-1.1.0-beta.7-Setup.exe
 ```
+
+在已登录 Windows 桌面上运行 `-CheckWindowScene`，需有开启硬件加速的 Chrome 或 Edge。测试在独立配置中打开本地纯色页，检查两种场景实际改变像素，并验证鼠标命中原窗口。
 
 Dream Skin 源码应固定到 v1.5.21，Windows 导入器需要上游认可的签名 Node.js。CI 包含编译、原生窗口、离线音频、事件通道和配色验证。发布前在隔离桌面配置导入两槽和两图，核对审批控件可点击、变更可读、可还原；使用物理音箱时再复查相对音量。在用户桌面另行核对视觉效果。
 

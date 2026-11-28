@@ -170,6 +170,11 @@ namespace TwinShift
         static int Main(string[] args)
         {
             if (args.Length == 1 && args[0] == "--scene-host") return WindowSceneChecks.RunHost();
+            if (args.Length == 3 && args[0] == "--chromium-scene")
+            {
+                try { ChromiumSceneChecks.Run(args[1], args[2]); return 0; }
+                catch (Exception e) { Console.Error.WriteLine(e); return 1; }
+            }
             if (args.Length == 1 && args[0] == "--window-scene")
             {
                 try { WindowSceneChecks.Run(); return 0; }

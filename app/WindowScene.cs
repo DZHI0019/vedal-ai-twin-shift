@@ -11,13 +11,21 @@ namespace TwinShift
 {
     internal sealed class WindowScene : IDisposable
     {
-        internal const int Child = 0x40000000, Disabled = 0x08000000, Transparent = 0x20, NoActivate = 0x08000000;
-        const int Visible = 0x10000000, Layered = 0x80000;
-        const uint NoActivation = 0x0010;
+        const int Popup = unchecked((int)0x80000000), Disabled = 0x08000000;
+        const int Layered = 0x80000, Transparent = 0x20, ToolWindow = 0x80, NoActivate = 0x08000000;
+        const uint NoZOrder = 0x0004, NoActivation = 0x0010, Show = 0x0040, NoOwnerZOrder = 0x0200;
+        const uint LocationChange = 0x800b;
+        delegate void WinEvent(IntPtr hook, uint kind, IntPtr window, int objectId, int childId, uint thread, uint time);
+        [StructLayout(LayoutKind.Sequential)] struct Origin { public int X, Y; }
         [DllImport("user32.dll")] static extern bool GetClientRect(IntPtr window, out BadgeWindow.Rect rect);
+        [DllImport("user32.dll")] static extern bool ClientToScreen(IntPtr window, ref Origin point);
         [DllImport("user32.dll")] static extern uint GetDpiForWindow(IntPtr window);
         [DllImport("user32.dll")] static extern bool IsWindow(IntPtr window);
         [DllImport("user32.dll")] static extern bool IsIconic(IntPtr window);
+        [DllImport("user32.dll")] static extern bool ShowWindow(IntPtr window, int command);
+        [DllImport("user32.dll")] static extern uint GetWindowThreadProcessId(IntPtr window, out uint process);
+        [DllImport("user32.dll")] static extern IntPtr SetWinEventHook(uint first, uint last, IntPtr module, WinEvent callback, uint process, uint thread, uint flags);
+        [DllImport("user32.dll")] static extern bool UnhookWinEvent(IntPtr hook);
         [DllImport("user32.dll", SetLastError = true)]
         static extern bool SetWindowPos(IntPtr window, IntPtr after, int x, int y, int w, int h, uint flags);
         [DllImport("user32.dll", CharSet = CharSet.Unicode)]
@@ -31,14 +39,16 @@ namespace TwinShift
         readonly TextBlock signature = new TextBlock { FontSize = 12, FontWeight = FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center };
         readonly Glyph cue = new Glyph { Width = 14, Height = 14, Margin = new Thickness(6, 0, 0, 0), Visibility = Visibility.Collapsed };
         readonly Border sceneImage;
+        readonly WinEvent locationChanged;
         HwndSource source;
-        IntPtr host;
+        IntPtr host, locationHook;
         Rect previous = Rect.Empty;
         bool? shownNight;
         BitmapSource light, dark;
 
         internal WindowScene()
         {
+            locationChanged = OnLocationChanged;
             var lateral = new LinearGradientBrush { StartPoint = new Point(0, .5), EndPoint = new Point(1, .5) };
             lateral.GradientStops.Add(new GradientStop(Colors.Transparent, 0));
             lateral.GradientStops.Add(new GradientStop(Color.FromArgb(18, 0, 0, 0), .28));
@@ -86,22 +96,28 @@ namespace TwinShift
             return preferences.Night;
         }
 
+        static Rect ScreenPlacement(IntPtr parent)
+        {
+            var origin = new Origin();
+            if (IsIconic(parent) || !GetClientRect(parent, out var size) || !ClientToScreen(parent, ref origin)) return Rect.Empty;
+            double scale = Math.Max(96u, GetDpiForWindow(parent)) / 96d;
+            var dip = Placement(size.Right / scale, size.Bottom / scale);
+            if (dip.IsEmpty) return Rect.Empty;
+            return new Rect(origin.X + Math.Round(dip.X * scale), origin.Y + Math.Round(dip.Y * scale),
+                Math.Round(dip.Width * scale), Math.Round(dip.Height * scale));
+        }
+
         internal void Present(IntPtr parent, bool night, bool showTurtle)
         {
             if (!IsWindow(parent)) { Dispose(); return; }
-            if (IsIconic(parent)) return;
-            if (!GetClientRect(parent, out var size)) { Dispose(); return; }
-            double scale = Math.Max(96u, GetDpiForWindow(parent)) / 96d;
-            var dip = Placement(size.Right / scale, size.Bottom / scale);
-            if (dip.IsEmpty) { Dispose(); return; }
-            var pixels = new Rect(Math.Round(dip.X * scale), Math.Round(dip.Y * scale),
-                Math.Round(dip.Width * scale), Math.Round(dip.Height * scale));
+            var pixels = ScreenPlacement(parent);
+            if (pixels.IsEmpty) { Hide(); return; }
             if (Parent != parent)
             {
                 Dispose();
                 var parameters = new HwndSourceParameters("Vedal AI") {
-                    ParentWindow = parent, WindowStyle = Child | Visible | Disabled,
-                    ExtendedWindowStyle = Layered | Transparent | NoActivate,
+                    ParentWindow = parent, WindowStyle = Popup | Disabled,
+                    ExtendedWindowStyle = Layered | Transparent | NoActivate | ToolWindow,
                     UsesPerPixelTransparency = true, PositionX = (int)pixels.X, PositionY = (int)pixels.Y,
                     Width = (int)pixels.Width, Height = (int)pixels.Height
                 };
@@ -109,6 +125,8 @@ namespace TwinShift
                 host = parent;
                 source.CompositionTarget.BackgroundColor = Colors.Transparent;
                 source.RootVisual = art;
+                uint thread = GetWindowThreadProcessId(parent, out uint process);
+                locationHook = SetWinEventHook(LocationChange, LocationChange, IntPtr.Zero, locationChanged, process, thread, 0);
             }
             if (shownNight != night)
             {
@@ -123,13 +141,30 @@ namespace TwinShift
             }
             if (showTurtle && turtle.Source == null) turtle.Source = Files.Image("tutel.png");
             turtle.Visibility = showTurtle ? Visibility.Visible : Visibility.Collapsed;
-            if (pixels != previous)
-            {
-                if (!SetWindowPos(source.Handle, IntPtr.Zero, (int)pixels.X, (int)pixels.Y,
-                    (int)pixels.Width, (int)pixels.Height, NoActivation))
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
-                previous = pixels;
-            }
+            if (pixels != previous && !Place(pixels)) throw new Win32Exception(Marshal.GetLastWin32Error());
+        }
+
+        void OnLocationChanged(IntPtr hook, uint kind, IntPtr window, int objectId, int childId, uint thread, uint time)
+        {
+            if (window != host || objectId != 0 || childId != 0 || previous.IsEmpty || Handle == IntPtr.Zero) return;
+            var pixels = ScreenPlacement(host);
+            if (pixels.IsEmpty) Hide();
+            else if (pixels != previous) Place(pixels);
+        }
+
+        bool Place(Rect pixels)
+        {
+            if (!SetWindowPos(Handle, IntPtr.Zero, (int)pixels.X, (int)pixels.Y,
+                (int)pixels.Width, (int)pixels.Height, NoActivation | NoOwnerZOrder | NoZOrder | Show)) return false;
+            previous = pixels;
+            return true;
+        }
+
+        internal void Hide()
+        {
+            if (host != IntPtr.Zero && !IsWindow(host)) { Dispose(); return; }
+            if (!previous.IsEmpty && Handle != IntPtr.Zero) ShowWindow(Handle, 0);
+            previous = Rect.Empty;
         }
 
         internal void Pulse(string kind)
@@ -140,6 +175,11 @@ namespace TwinShift
 
         public void Dispose()
         {
+            if (locationHook != IntPtr.Zero)
+            {
+                UnhookWinEvent(locationHook);
+                locationHook = IntPtr.Zero;
+            }
             if (source != null && !source.IsDisposed)
             {
                 source.RootVisual = null;

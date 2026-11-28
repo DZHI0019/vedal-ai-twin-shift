@@ -50,7 +50,6 @@ namespace TwinShift
         readonly Border frame;
         readonly Glyph chip;
         readonly WindowScene scene = new WindowScene();
-        DateTime nextLookup;
         string sceneError;
         internal event Action<string> SceneFailed;
         IntPtr cachedHandle;
@@ -181,17 +180,12 @@ namespace TwinShift
                 if (prefs.WindowScene)
                 {
                     if (IsVisible) Hide();
-                    var parent = eligible ? main : scene.Parent;
-                    if (parent == IntPtr.Zero && DateTime.UtcNow >= nextLookup)
+                    if (eligible)
                     {
-                        parent = FindMainWindow();
-                        nextLookup = DateTime.UtcNow.AddSeconds(3);
-                    }
-                    if (parent != IntPtr.Zero)
-                    {
-                        scene.Present(parent, WindowScene.IsNight(parent, prefs), prefs.Badge);
+                        scene.Present(main, WindowScene.IsNight(main, prefs), prefs.Badge);
                         sceneError = null;
                     }
+                    else scene.Hide();
                     return;
                 }
                 if (!eligible || !GetWindowRect(main, out var r))
@@ -221,25 +215,6 @@ namespace TwinShift
                 }
                 Hide();
             }
-        }
-
-        IntPtr FindMainWindow()
-        {
-            if (target != null)
-            {
-                target.Refresh();
-                return target.MainWindowHandle;
-            }
-            IntPtr found = IntPtr.Zero;
-            foreach (var process in Process.GetProcessesByName("ChatGPT"))
-                using (process)
-                {
-                    if (found != IntPtr.Zero || process.MainWindowHandle == IntPtr.Zero || !CodexDesktop.Matches(process)) continue;
-                    var cls = new StringBuilder(100);
-                    if (GetClassName(process.MainWindowHandle, cls, cls.Capacity) > 0 && cls.ToString() == "Chrome_WidgetWin_1")
-                        found = process.MainWindowHandle;
-                }
-            return found;
         }
 
         internal void Finish()

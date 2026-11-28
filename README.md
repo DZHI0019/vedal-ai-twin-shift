@@ -1,6 +1,6 @@
 # Vedal AI · Twin Shift
 
-**Beta 6 把 neuro 的复古电台和 Evil 的地下室放进日常 Codex 主窗口，内置八段可离线播放的直播原声。** [公开版本和 SHA-256 清单](https://github.com/DZHI0019/vedal-ai-twin-shift/releases)
+**在日常 Codex 窗口里看 neuro 的复古电台和 Evil 的地下室，离线听八段直播原声。** [公开版本和 SHA-256 清单](https://github.com/DZHI0019/vedal-ai-twin-shift/releases)
 
 给 Windows 版 Codex 的 neuro、Evil 和 Vedal 同人主题。neuro 的「月之亮面」使用暖纸色和 IBM 5100 电台，Evil 的「月之暗面」使用近黑灰阶和地下室场景。代码仍有清晰的增删标记。Vedal AI 是主题署名，模型名称和权限审批由 Codex 显示。
 
@@ -8,7 +8,7 @@
 
 1. 运行所选版本的 `TwinShift-<版本>-Setup.exe`。安装面向当前 Windows 用户，需要 .NET Framework 4.8。打开开始菜单中的 **Twin Shift**。
 2. 在控制台「外观」备份 Codex 原有的两槽主题，分别将「月之亮面」和「月之暗面」导入 Codex「设置 → 外观」中的浅色和深色槽。选择系统模式后，窗口配色会随系统外观切换。在控制台「外观」打开「显示角色背景」，可分别开关 Vedal 小龟。
-3. 继续从原来的 Codex 图标进入。角色场景随窗口缩放。「跟随系统」以 Codex 窗口的明暗选择图片。控制台退出后，场景随即收起。
+3. 继续从原来的 Codex 图标进入。角色场景随窗口移动、缩放，切到其他应用时收起。「跟随系统」以 Codex 窗口的明暗选择图片。控制台退出后，场景随即收起。
 4. 打开「语音」，点台词旁的 **播放**。可以离线听到 neuro、Evil 和 Vedal 的直播原声。通过 **⋯ → 使用本地 WAV…** 可替换任意一句，选择 **恢复内置语音** 可撤销。
 5. 在「接入」启用事件插件，在 Codex 的 Hooks 设置审阅该插件并打开新聊天。在「语音」选择是否自动播放测试结果。控制台可收进托盘。审批、提问、测试成功、失败、中断和普通回合结束分别处理。
 
@@ -36,7 +36,7 @@
 ./tools/build.ps1
 ./tools/test.ps1
 ./tools/build.ps1 -MakeNSIS 'C:\Program Files (x86)\NSIS\makensis.exe'
-./tests/installer.ps1 -Installer './out/TwinShift-1.1.0-beta.6-Setup.exe'
+./tests/installer.ps1 -Installer './out/TwinShift-1.1.0-beta.7-Setup.exe'
 ```
 
 编译产物在 `out/`。主题源、素材署名、版本兼容和复验步骤见[维护手册](docs/MAINTAINING.md)。欢迎提交可复现的问题，附 Codex、Windows、主题版本和操作步骤即可。发截图前请遮盖项目名、聊天内容和个人路径。

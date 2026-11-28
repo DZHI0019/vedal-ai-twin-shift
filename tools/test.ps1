@@ -27,6 +27,12 @@ try {
     if($CheckWindowScene){
         & (Join-Path $stage 'TwinShift.Checks.exe') --window-scene
         if($LASTEXITCODE){throw "Visible wallpaper test failed. Test root: $run"}
+        $browser = @("$env:ProgramFiles/Google/Chrome/Application/chrome.exe",
+            "${env:ProgramFiles(x86)}/Microsoft/Edge/Application/msedge.exe") |
+            Where-Object { Test-Path -LiteralPath $_ } | Select-Object -First 1
+        if(!$browser){throw 'The desktop scene check requires Chrome or Edge with GPU acceleration.'}
+        & (Join-Path $stage 'TwinShift.Checks.exe') --chromium-scene $browser $run
+        if($LASTEXITCODE){throw "Chromium artwork test failed. Test root: $run"}
     }
     & node --test (Join-Path $root 'themes/theme.test.mjs')
     if($LASTEXITCODE){throw 'Palette tests failed'}

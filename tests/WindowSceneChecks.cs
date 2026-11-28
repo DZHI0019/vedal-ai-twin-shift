@@ -14,7 +14,7 @@ namespace TwinShift
     internal static class WindowSceneChecks
     {
         [StructLayout(LayoutKind.Sequential)] struct Point { public int X, Y; }
-        [DllImport("user32.dll")] static extern IntPtr GetParent(IntPtr window);
+        [DllImport("user32.dll")] static extern IntPtr GetWindow(IntPtr window, uint relation);
         [DllImport("user32.dll")] static extern IntPtr GetAncestor(IntPtr window, uint relation);
         [DllImport("user32.dll")] static extern IntPtr WindowFromPoint(Point pt);
         [DllImport("user32.dll")] static extern bool ClientToScreen(IntPtr window, ref Point pt);
@@ -45,7 +45,7 @@ namespace TwinShift
             return new Application().Run(fixture);
         }
 
-        static void Paint()
+        internal static void Paint()
         {
             var until = Stopwatch.StartNew();
             while (until.ElapsedMilliseconds < 360)
@@ -56,7 +56,7 @@ namespace TwinShift
         }
 
         // Only sample the opaque test window belonging to the child process we launched.
-        static uint[] Sample(IntPtr parent, IntPtr layer)
+        internal static uint[] Sample(IntPtr parent, IntPtr layer)
         {
             GetClientRect(parent, out var size);
             var output = new uint[9];
@@ -95,7 +95,7 @@ namespace TwinShift
                     if (baseline.Any(x => x != 0x0a0a0a)) throw new Exception("Unexpected test window background.");
                     scene.Present(parent, true, true);
                     Paint();
-                    if (GetParent(scene.Handle) != parent) throw new Exception("Scene is not a native child of the test window.");
+                    if (GetWindow(scene.Handle, 4) != parent) throw new Exception("The test window does not own the scene.");
                     var dark = Sample(parent, scene.Handle);
                     if (dark.Distinct().Count() < 4 || dark.SequenceEqual(baseline)) throw new Exception("Evil artwork not painted on desktop.");
                     scene.Present(parent, false, true);

@@ -39,7 +39,7 @@ try {
     });
   }
   try {
-    await request(1, 'initialize', { clientInfo: { name: 'twinshift_checks', title: 'Twin Shift checks', version: '1.1.0-beta.6' }, capabilities: { experimentalApi: true } });
+    await request(1, 'initialize', { clientInfo: { name: 'twinshift_checks', title: 'Twin Shift checks', version: '1.1.0-beta.7' }, capabilities: { experimentalApi: true } });
     send({ method: 'initialized' });
     const result = await request(2, 'hooks/list', { cwds: [scratch] });
     const entries = result.data.flatMap(row => {
