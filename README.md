@@ -36,7 +36,7 @@
 ./tools/build.ps1
 ./tools/test.ps1
 ./tools/build.ps1 -MakeNSIS 'C:\Program Files (x86)\NSIS\makensis.exe'
-./tests/installer.ps1 -Installer './out/TwinShift-1.1.0-beta.7-Setup.exe'
+./tests/installer.ps1 -Installer './out/TwinShift-1.1.0-beta.8-Setup.exe'
 ```
 
 编译产物在 `out/`。主题源、素材署名、版本兼容和复验步骤见[维护手册](docs/MAINTAINING.md)。欢迎提交可复现的问题，附 Codex、Windows、主题版本和操作步骤即可。发截图前请遮盖项目名、聊天内容和个人路径。

@@ -34,11 +34,10 @@ namespace TwinShift
         static extern int DwmGetWindowAttribute(IntPtr window, int setting, out int value, int size);
 
         readonly Grid art = new Grid { IsHitTestVisible = false, Focusable = false, ClipToBounds = true };
-        readonly ImageBrush picture = new ImageBrush { Stretch = Stretch.UniformToFill, AlignmentX = AlignmentX.Right };
+        readonly ImageBrush picture = new ImageBrush { Stretch = Stretch.Uniform, AlignmentX = AlignmentX.Right };
         readonly Image turtle = new Image { Width = 27, Height = 27, Margin = new Thickness(0, 0, 6, 0) };
         readonly TextBlock signature = new TextBlock { FontSize = 12, FontWeight = FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center };
         readonly Glyph cue = new Glyph { Width = 14, Height = 14, Margin = new Thickness(6, 0, 0, 0), Visibility = Visibility.Collapsed };
-        readonly Border sceneImage;
         readonly WinEvent locationChanged;
         HwndSource source;
         IntPtr host, locationHook;
@@ -49,22 +48,8 @@ namespace TwinShift
         internal WindowScene()
         {
             locationChanged = OnLocationChanged;
-            var lateral = new LinearGradientBrush { StartPoint = new Point(0, .5), EndPoint = new Point(1, .5) };
-            lateral.GradientStops.Add(new GradientStop(Colors.Transparent, 0));
-            lateral.GradientStops.Add(new GradientStop(Color.FromArgb(18, 0, 0, 0), .28));
-            lateral.GradientStops.Add(new GradientStop(Color.FromArgb(58, 0, 0, 0), .53));
-            lateral.GradientStops.Add(new GradientStop(Color.FromArgb(153, 0, 0, 0), .81));
-            lateral.GradientStops.Add(new GradientStop(Color.FromArgb(144, 0, 0, 0), 1));
-            lateral.Freeze();
-            var vertical = new LinearGradientBrush { StartPoint = new Point(.5, 0), EndPoint = new Point(.5, 1) };
-            vertical.GradientStops.Add(new GradientStop(Colors.Transparent, 0));
-            vertical.GradientStops.Add(new GradientStop(Colors.Black, .17));
-            vertical.GradientStops.Add(new GradientStop(Colors.Black, .76));
-            vertical.GradientStops.Add(new GradientStop(Colors.Transparent, 1));
-            vertical.Freeze();
-            sceneImage = new Border { Background = picture, OpacityMask = lateral };
-            art.Children.Add(new Border { Child = sceneImage, OpacityMask = vertical });
-            RenderOptions.SetBitmapScalingMode(sceneImage, BitmapScalingMode.HighQuality);
+            art.Background = picture;
+            RenderOptions.SetBitmapScalingMode(art, BitmapScalingMode.HighQuality);
             RenderOptions.SetBitmapScalingMode(turtle, BitmapScalingMode.NearestNeighbor);
             var imprint = new StackPanel {
                 Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right,
@@ -131,11 +116,10 @@ namespace TwinShift
             if (shownNight != night)
             {
                 var name = night ? "Evil" : "neuro";
-                picture.ImageSource = night ? (dark ??= Files.Image("evo.jpg")) : (light ??= Files.Image("neo.jpg"));
+                picture.ImageSource = night ? (dark ??= SceneArtwork.Load(true)) : (light ??= SceneArtwork.Load(false));
                 signature.Text = "Vedal AI · " + name;
                 signature.Foreground = night ? Brushes.Wheat : Brushes.DarkSlateGray;
                 cue.Stroke = signature.Foreground;
-                sceneImage.Opacity = night ? 1 : .79;
                 SetWindowText(source.Handle, signature.Text);
                 shownNight = night;
             }

@@ -192,6 +192,7 @@ namespace TwinShift
                 int engine = Array.IndexOf(args, "--wallpaper-engine");
                 if (engine >= 0)
                     WallpaperHeaderChecks.Run(args[engine + 1]);
+                WindowSceneChecks.CheckFeather();
                 string apps = Path.Combine(Path.GetTempPath(), "WindowsApps");
                 string package = "OpenAI.Codex_1.2.3.4_x64__2p2nqsd0c76g0";
                 Require(CodexDesktop.IsInstalledImage(Path.Combine(apps, package, "app", "ChatGPT.exe"), apps), "Packaged Codex");

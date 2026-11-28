@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace TwinShift
@@ -23,6 +24,37 @@ namespace TwinShift
         [DllImport("user32.dll")] static extern int ReleaseDC(IntPtr window, IntPtr dc);
         [DllImport("gdi32.dll")] static extern uint GetPixel(IntPtr dc, int x, int y);
         [DllImport("user32.dll")] static extern bool IsWindow(IntPtr window);
+
+        internal static void CheckFeather()
+        {
+            const int width = 1920, height = 65, stride = width * 4;
+            var pixels = new byte[height * stride];
+            for (int p = 0; p < pixels.Length; p += 4)
+            {
+                pixels[p] = 32;
+                pixels[p + 1] = 42;
+                pixels[p + 2] = 52;
+                pixels[p + 3] = 255;
+            }
+            var wall = BitmapSource.Create(width, height, 96, 96, PixelFormats.Bgra32, null, pixels, stride);
+            foreach (bool night in new[] { true, false })
+            {
+                SceneArtwork.Feather(wall, night).CopyPixels(pixels, stride, 0);
+                int mid = (height / 2) * stride;
+                if (pixels[mid + 3] != 0 || pixels[stride - 1] != 0 || pixels[pixels.Length - 1] != 0)
+                    throw new Exception("The edge of the illustration must blend fully into the window.");
+                int previous = -1, run = 0;
+                for (int x = 525; x < 860; x++)
+                {
+                    int p = mid + x * 4;
+                    int background = ((255 - pixels[p + 3]) * (night ? 10 : 248) + 127) / 255;
+                    int rgb = (pixels[p] + background) | ((pixels[p + 1] + background) << 8) | ((pixels[p + 2] + background) << 16);
+                    run = rgb == previous ? run + 1 : 1;
+                    if (run >= 32) throw new Exception("A flat colour stripe crosses the central fade.");
+                    previous = rgb;
+                }
+            }
+        }
 
         internal static int RunHost()
         {
