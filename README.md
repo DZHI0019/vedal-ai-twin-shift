@@ -1,30 +1,32 @@
 # Vedal AI · Twin Shift
 
-**公开 Beta · v1.1.0-beta.1**　[下载 Windows 安装包和 SHA-256 清单](https://github.com/DZHI0019/vedal-ai-twin-shift/releases/tag/v1.1.0-beta.1)
+**在日常 Codex 窗口里看 neuro 的复古电台和 Evil 的地下室，离线听八段直播原声。** [公开版本和 SHA-256 清单](https://github.com/DZHI0019/vedal-ai-twin-shift/releases)
 
-给 Windows 版 Codex 的 Neuro-sama、Evil Neuro 和 Vedal 同人主题。Neo 白班用暖纸色、IBM 5100 和电台小灯；Evo 夜班用近黑灰阶、地下室管道和碎心。代码仍有清晰的增删标记。Vedal AI 是主题署名，模型名称和权限审批由 Codex 显示。
+给 Windows 版 Codex 的 neuro、Evil 和 Vedal 同人主题。neuro 的「月之亮面」使用暖纸色和 IBM 5100 电台，Evil 的「月之暗面」使用近黑灰阶和地下室场景。代码仍有清晰的增删标记。Vedal AI 是主题署名，模型名称和权限审批由 Codex 显示。
 
 ## 使用
 
-1. 运行发布包中的 `TwinShift-1.1.0-beta.1-Setup.exe`。安装面向当前 Windows 用户，需要 .NET Framework 4.8。打开开始菜单中的 **Twin Shift**。
-2. 在控制台「外观」备份 Codex 原有的两槽主题，分别复制 Neo 和 Evo 到 Codex「设置 → 外观」对应的导入框。选择系统模式后，窗口配色会随系统外观切换。侧栏小龟可以单独开启。
-3. 想看两幅场景时，将「打开两套壁纸包」中的 ZIP 导入 Dream Skin，再从 Saved Themes 选择。它是可选的第三方宿主，每套主题使用一张图。安装、恢复和重启由使用者决定。[Dream Skin v1.5.21](https://github.com/Fei-Away/Codex-Dream-Skin/releases/tag/v1.5.21)
-4. 在「原声」开启个人联机片源后点试听，或从台词的 **⋯** 导入本地 WAV。八句原声覆盖两位角色和 Vedal。在线录音仅按需取得，逐句校验 SHA-256。安装包包含目录、出处和一声原创注意提示。
-5. 在「接入」启用事件插件，在 Codex 的 Hooks 设置审阅该插件并打开新聊天。在「原声」选择是否自动播放测试结果。控制台可收进托盘。审批、提问、测试成功、失败、中断和普通回合结束分别处理。
+1. 运行所选版本的 `TwinShift-<版本>-Setup.exe`。安装面向当前 Windows 用户，需要 .NET Framework 4.8。打开开始菜单中的 **Twin Shift**。
+2. 在控制台「外观」备份 Codex 原有的两槽主题，分别将「月之亮面」和「月之暗面」导入 Codex「设置 → 外观」中的浅色和深色槽。选择系统模式后，窗口配色会随系统外观切换。在控制台「外观」打开「显示角色背景」，可分别开关 Vedal 小龟。
+3. 继续从原来的 Codex 图标进入。打开右侧图片或文件预览时，插画和小龟自动收起，关闭面板后恢复。角色场景随窗口移动、缩放，切到其他应用时收起。「跟随系统」以 Codex 窗口的明暗选择图片。
+4. 打开「语音」，点台词旁的 **播放**。可以离线听到 neuro、Evil 和 Vedal 的直播原声。通过 **⋯ → 使用本地 WAV…** 可替换任意一句，选择 **恢复内置语音** 可撤销。
+5. 在「接入」启用事件插件，再到 Codex「设置 → 钩子」审阅。桌面版在尚未添加本地项目时会显示「未找到钩子」。测试语音只需要允许 Vedal AI 的 `PostToolUse`。在「语音」打开自动播放测试结果，进入新聊天。
 
 | 场景 | 可以看到、听到的反馈 |
 | --- | --- |
-| 阅读与写代码 | 白班使用深苔绿主操作、暖纸色表面和绿灰色文字。壁纸包可修饰侧栏、输入框和对话框。窗边 Vedal 可以点，窄窗口自动收起。 |
+| 阅读与写代码 | 白班使用深苔绿主操作、暖纸色表面和绿灰色文字。壁纸包可修饰侧栏、输入框和对话框。右侧的 Vedal 小龟与场景一起显示。控制台内点击小龟可试听原声。 |
 | 查看用量 | 在 Codex 支持的聊天中输入 `/status`。原生字符刻度沿用主题前景，百分比、周期、重置时间和窄窗布局由 Codex 提供。控制台无需读取账户额度。 |
 | 等待审批 | 原生审批按钮和命令继续显示；可单独开启短提示。 |
 | 有通过报告 | 白班 Heart 和「Yay!」，夜班管道和「I win? Let’s go!」。通过记录提供 Vedal 和管道彩蛋。 |
 | 有失败报告 | 显示失败；夜班可播放「Aww, shucks.」。普通回合结束只显示文字。 |
 
-联机、自动语音和窗边装饰均默认关闭。主题程序没有后台更新服务或遥测。安装本身不会启用插件、应用配色或重启 Codex。恢复、片源和手动卸载步骤见[使用手册](docs/使用手册.html)。
+语音从本地读取。角色背景和自动语音默认关闭。启用背景时，普通安装会在当前 Windows 用户登录后启动托盘伴侣。关闭该开关会移除登录启动项。主题程序没有后台更新服务或遥测。安装本身不会启用插件、应用配色或重启 Codex。恢复、片源和手动卸载步骤见[使用手册](docs/使用手册.html)。
 
 ### Beta 兼容情况
 
-Windows Codex 26.1120.6357.0 的两套项目首页已在独立配置中实拍。Dream Skin 1.5.21 能绘制壁纸和输入框，其标题栏着色检查在该版本仍提示缺少匹配项。小龟已适配新版 Windows 应用包；它与审批卡、代码 diff 在同一窗口中同时可见的效果仍待实机验收。安装程序尚未签署 Authenticode，可在发布页核对 SHA-256。
+在 Windows Codex 26.1120.6357.0 上，beta.2 可通过「接入 → 适配新版标题栏」为 Dream Skin 1.5.21 启用菜单与标题栏着色。从 beta.1 升级时请重新导入安装包里的两份壁纸 ZIP，再从 Saved Themes 选择。「还原宿主标题栏」可恢复上游原文件。neuro 和 Evil 的独立测试首页均通过宿主的必需部件检查，输入框完整可见。
+
+小龟可绑定一个专用 Codex 实例。真实审批、代码 diff、任务完成和窗边小龟的同屏验收仍在进行。公开 beta.1 使用未签名安装程序。候选版的签名构建与验签方法见维护手册。
 
 ## 构建
 
@@ -34,11 +36,11 @@ Windows Codex 26.1120.6357.0 的两套项目首页已在独立配置中实拍。
 ./tools/build.ps1
 ./tools/test.ps1
 ./tools/build.ps1 -MakeNSIS 'C:\Program Files (x86)\NSIS\makensis.exe'
-./tests/installer.ps1 -Installer './out/TwinShift-1.1.0-beta.1-Setup.exe'
+./tests/installer.ps1 -Installer './out/TwinShift-1.1.0-beta.9-Setup.exe'
 ```
 
 编译产物在 `out/`。主题源、素材署名、版本兼容和复验步骤见[维护手册](docs/MAINTAINING.md)。欢迎提交可复现的问题，附 Codex、Windows、主题版本和操作步骤即可。发截图前请遮盖项目名、聊天内容和个人路径。
 
 ## 许可
 
-代码及原创界面图标采用 [MIT](LICENSE)。像素乌龟、生成的同人场景与外部录音的权利信息分别列在[素材署名](assets/NOTICE.md)。本项目为非官方同人作品。
+代码及原创界面图标采用 [MIT](LICENSE)。像素乌龟、生成的同人场景与直播录音的署名和分发授权分别列在[素材署名](assets/NOTICE.md)。本项目为非官方同人作品。

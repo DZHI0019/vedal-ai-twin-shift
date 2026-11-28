@@ -2,12 +2,12 @@ using System;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
-using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace TwinShift
@@ -22,6 +22,8 @@ namespace TwinShift
 
         [DllImport("user32.dll")]
         static extern IntPtr GetForegroundWindow();
+        [DllImport("user32.dll")]
+        static extern IntPtr GetWindow(IntPtr window, uint relation);
         [DllImport("user32.dll")]
         static extern bool GetWindowRect(IntPtr h, out Rect r);
         [DllImport("user32.dll")]
@@ -45,13 +47,21 @@ namespace TwinShift
             Interval = TimeSpan.FromSeconds(3)
         };
         readonly Preferences prefs;
+        readonly Process target;
         readonly Border frame;
         readonly Glyph chip;
+        readonly WindowScene scene = new WindowScene();
+        readonly PreviewPanel preview = new PreviewPanel();
+        string sceneError;
+        internal event Action<string> SceneFailed;
         IntPtr cachedHandle;
+        uint cachedPid;
         bool eligible;
-        internal BadgeWindow(Preferences prefs, Action click, Action panel)
+        bool checkingPreview;
+        internal BadgeWindow(Preferences prefs, Process target, Action click, Action panel)
         {
             this.prefs = prefs;
+            this.target = target;
             WindowStyle = WindowStyle.None;
             ResizeMode = ResizeMode.NoResize;
             ShowInTaskbar = false;
@@ -64,7 +74,7 @@ namespace TwinShift
             {
                 Width = 28,
                 Height = 28,
-                Source = new BitmapImage(new Uri(Files.Asset("tutel.png")))
+                Source = Files.Image("tutel.png")
             };
             RenderOptions.SetBitmapScalingMode(image, BitmapScalingMode.NearestNeighbor);
             var strip = new StackPanel
@@ -89,7 +99,7 @@ namespace TwinShift
             frame.SetResourceReference(Border.BackgroundProperty, "Card");
             frame.SetResourceReference(Border.BorderBrushProperty, "Edge");
             Content = frame;
-            ToolTip = "Vedal AI · 点击听小龟，右键打开值班室";
+            ToolTip = "Vedal AI · 点击听小龟，右键打开控制台";
             MouseLeftButtonUp += (s, e) => click();
             MouseRightButtonUp += (s, e) => panel();
             SourceInitialized += (s, e) =>
@@ -101,6 +111,7 @@ namespace TwinShift
             reset.Tick += (s, e) =>
             {
                 reset.Stop();
+                scene.Pulse(null);
                 chip.Kind = prefs.Night ? "pipes" : "heart";
             };
         }
@@ -109,17 +120,29 @@ namespace TwinShift
         {
             reset.Stop();
             chip.Kind = prefs.Night ? "pipes" : "heart";
-            if (prefs.Badge && !SystemParameters.HighContrast)
+            if (!prefs.WindowScene) scene.Dispose();
+            if ((prefs.WindowScene || prefs.Badge) && !SystemParameters.HighContrast)
+            {
                 tracker.Start();
+                Track();
+            }
             else
             {
                 tracker.Stop();
+                scene.Dispose();
                 Hide();
             }
         }
 
         internal void Pulse(string glyph)
         {
+            if (prefs.WindowScene && scene.Parent != IntPtr.Zero)
+            {
+                scene.Pulse(glyph);
+                reset.Stop();
+                reset.Start();
+                return;
+            }
             if (!IsVisible)
                 return;
             chip.Kind = glyph;
@@ -130,24 +153,52 @@ namespace TwinShift
             chip.BeginAnimation(OpacityProperty, new DoubleAnimation(.35, 1, TimeSpan.FromMilliseconds(300)) { FillBehavior = FillBehavior.Stop });
         }
 
-        void Track()
+        async void Track()
         {
             try
             {
                 IntPtr main = GetForegroundWindow();
-                if (main != cachedHandle)
+                GetWindowThreadProcessId(main, out uint pid);
+                if (target != null && target.HasExited)
+                {
+                    scene.Dispose();
+                    tracker.Stop();
+                    Hide();
+                    return;
+                }
+                if (main != cachedHandle || pid != cachedPid)
                 {
                     cachedHandle = main;
+                    cachedPid = pid;
                     eligible = false;
                     var cls = new StringBuilder(100);
-                    if (main != IntPtr.Zero && GetClassName(main, cls, 100) > 0 && cls.ToString() == "Chrome_WidgetWin_1")
+                    if ((target == null || pid == target.Id) && main != IntPtr.Zero && GetWindow(main, 4) == IntPtr.Zero &&
+                        GetClassName(main, cls, 100) > 0 && cls.ToString() == "Chrome_WidgetWin_1")
                     {
-                        GetWindowThreadProcessId(main, out uint pid);
                         using (var p = Process.GetProcessById((int)pid))
                             eligible = CodexDesktop.Matches(p);
                     }
                 }
 
+                if (prefs.WindowScene)
+                {
+                    if (IsVisible) Hide();
+                    if (!eligible)
+                    {
+                        scene.Hide();
+                        return;
+                    }
+                    if (scene.Parent != main) scene.Hide();
+                    if (checkingPreview) return;
+                    checkingPreview = true;
+                    bool allowed;
+                    try { allowed = await Task.Run(() => preview.AllowsArtwork(main)); }
+                    finally { checkingPreview = false; }
+                    if (!tracker.IsEnabled || !prefs.WindowScene || GetForegroundWindow() != main) return;
+                    scene.Present(main, WindowScene.IsNight(main, prefs), prefs.Badge, allowed);
+                    sceneError = null;
+                    return;
+                }
                 if (!eligible || !GetWindowRect(main, out var r))
                 {
                     Hide();
@@ -165,8 +216,14 @@ namespace TwinShift
                     Show();
                 SetWindowPos(new WindowInteropHelper(this).Handle, new IntPtr(-1), r.Left + (int)(15 * dpi), r.Bottom - (int)(78 * dpi), 0, 0, 0x0011);
             }
-            catch (Exception e)when (e is ArgumentException || e is InvalidOperationException || e is System.ComponentModel.Win32Exception)
+            catch (Exception e)when (e is ArgumentException || e is InvalidOperationException || e is System.ComponentModel.Win32Exception || e is System.IO.IOException)
             {
+                scene.Dispose();
+                if (prefs.WindowScene && sceneError != e.Message)
+                {
+                    sceneError = e.Message;
+                    SceneFailed?.Invoke("主窗口场景没有加载。" + e.Message);
+                }
                 Hide();
             }
         }
@@ -175,6 +232,7 @@ namespace TwinShift
         {
             tracker.Stop();
             reset.Stop();
+            scene.Dispose();
             Close();
         }
     }

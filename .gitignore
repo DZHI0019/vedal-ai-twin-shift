@@ -2,6 +2,7 @@
 **/obj/
 out/
 .vs/
+.upstream/
 *.user
 __pycache__/
 .env

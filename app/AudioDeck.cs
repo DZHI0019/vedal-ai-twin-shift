@@ -2,89 +2,39 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Net;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Media;
-using System.Windows;
+using System.Runtime.InteropServices;
 
 namespace TwinShift
 {
     internal sealed class AudioDeck : IDisposable
     {
-        const int Limit = 1400000;
         internal readonly Dictionary<string, Cue> Clips;
-        readonly HttpClient client = CreateClient();
-        static HttpClient CreateClient()
-        {
-            var handler = new HttpClientHandler
-            {
-                AllowAutoRedirect = false,
-                UseCookies = false,
-                UseDefaultCredentials = false
-            };
-            // .NET Framework uses Windows Internet Options by default. Also support an explicitly configured proxy
-            // for the two public HTTPS audio origins in managed desktop and CI environments.
-            string setting = Environment.GetEnvironmentVariable("HTTPS_PROXY");
-            if (Uri.TryCreate(setting, UriKind.Absolute, out var uri) && (uri.Scheme == "http" || uri.Scheme == "https") && uri.UserInfo.Length == 0)
-            {
-                string bypass = Environment.GetEnvironmentVariable("NO_PROXY") ?? "";
-                var hosts = bypass.Split(',').Select(x => x.Trim().TrimStart('.')).Where(x => x.Length > 0).ToArray();
-                if (hosts.Contains("*"))
-                    handler.UseProxy = false;
-                else
-                    handler.Proxy = new WebProxy(uri, false, hosts.Select(h => @"(?:^|[./])" + Regex.Escape(h) + @"(?::\d+)?$").ToArray());
-            }
-
-            return new HttpClient(handler)
-            {
-                Timeout = TimeSpan.FromSeconds(10)
-            };
-        }
-
-        readonly string temporary = Path.Combine(SignalBus.Root, "preview-cache");
         readonly Preferences settings;
-        readonly MediaPlayer player = new MediaPlayer();
+        readonly VoiceOutput output = new VoiceOutput();
         CancellationTokenSource pending;
         double trim = 1;
         int serial;
         public event Action<string> Notice;
-        internal event Action<Exception> PlaybackError;
+        internal event Action<string> Started;
+
         public AudioDeck(Preferences settings)
         {
             this.settings = settings;
             Clips = Files.ReadJson<Cue[]>(Files.Asset("voices.json"), 32768).ToDictionary(c => c.Id, StringComparer.Ordinal);
-            string[] ids =
-            {
-                "yay",
-                "win",
-                "filtered",
-                "help",
-                "shucks",
-                "pipes",
-                "tutel",
-                "vedal"
-            };
+            string[] ids = { "yay", "win", "filtered", "help", "shucks", "pipes", "tutel", "vedal" };
             if (Clips.Count != ids.Length || !ids.All(Clips.ContainsKey))
                 throw new InvalidDataException("角色语音目录不完整。");
             foreach (var c in Clips.Values)
             {
-                if (!Allowed(c.Url) || !Regex.IsMatch(c.Sha256 ?? "", @"\A[a-f0-9]{64}\z") || !(c.Gain > 0 && c.Gain <= 1))
+                if (!Regex.IsMatch(c.Sha256 ?? "", @"\A[a-f0-9]{64}\z") || !(c.Gain > 0 && c.Gain <= 1))
                     throw new InvalidDataException("角色语音目录无效。");
             }
 
             ClearTemporary();
-            player.MediaFailed += (s, e) => Notice?.Invoke("Windows 无法解码此音频。可换用本地 PCM WAV。");
-        }
-
-        internal static bool Allowed(string url)
-        {
-            if (!Uri.TryCreate(url, UriKind.Absolute, out var u) || u.Scheme != "https" || !u.IsDefaultPort || u.UserInfo != "" || u.Query != "" || u.Fragment != "")
-                return false;
-            return (u.Host == "storage.neurokaraoke.com" && u.AbsolutePath.StartsWith("/soundbites/", StringComparison.Ordinal)) || (u.Host == "minhtridotnet.github.io" && u.AbsolutePath.StartsWith("/neuro-sama-soundboard/Sounds/", StringComparison.Ordinal));
         }
 
         internal static string Digest(byte[] data)
@@ -95,64 +45,56 @@ namespace TwinShift
 
         internal void SetLevel()
         {
-            player.Volume = Math.Max(0, Math.Min(1, trim * settings.Volume / 100));
-        }
-
-        internal Duration MediaDuration => player.NaturalDuration;
-
-        internal bool MutedPlayback
-        {
-            set
-            {
-                player.IsMuted = value;
-            }
+            output.SetVolume((float)Math.Max(0, Math.Min(1, trim * settings.Volume / 100)));
         }
 
         internal void Stop()
         {
             serial++;
             pending?.Cancel();
-            player.Close();
         }
 
         string LocalFile(Cue cue) => Path.Combine(SignalBus.Root, "voices", cue.Id + ".wav");
-        string CachedFile(Cue cue) => Path.Combine(temporary, cue.Id + ".mp3");
         void ClearTemporary()
         {
-            if (!Directory.Exists(temporary) || (File.GetAttributes(temporary) & FileAttributes.ReparsePoint) != 0)
-                return;
-            foreach (var cue in Clips.Values)
+            string temporary = Path.Combine(SignalBus.Root, "preview-cache");
+            // Only old releases used a disk cache. Cleanup is best-effort.
+            try
             {
-                try
-                {
-                    File.Delete(CachedFile(cue));
-                }
-                catch (IOException)
-                {
-                }
-                catch (UnauthorizedAccessException)
-                {
-                }
+                if (!Directory.Exists(temporary) || (File.GetAttributes(temporary) & FileAttributes.ReparsePoint) != 0)
+                    return;
+                foreach (var cue in Clips.Values)
+                    File.Delete(Path.Combine(temporary, cue.Id + ".mp3"));
+            }
+            catch (IOException) { }
+            catch (UnauthorizedAccessException) { }
+        }
+
+        static byte[] ReadBounded(string path, int limit, string invalid)
+        {
+            using (var input = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete))
+            {
+                if (input.Length == 0 || input.Length > limit)
+                    throw new InvalidDataException(invalid);
+                using (var reader = new BinaryReader(input))
+                    return reader.ReadBytes((int)input.Length);
             }
         }
 
-        public void ClearOnline()
+        static byte[] ReadWave(string file) => ReadBounded(file, 4 * 1024 * 1024, "请选择 4 MB 以内的 PCM WAV。");
+
+        internal static byte[] ReadBundled(Cue cue)
         {
-            Stop();
-            ClearTemporary();
+            string path = Files.Asset(Path.Combine("voices", cue.Id + ".mp3"));
+            byte[] data = ReadBounded(path, 1400000, "内置语音大小异常，请重新安装。");
+            if (Digest(data) != cue.Sha256)
+                throw new InvalidDataException("内置语音校验失败，请重新安装。");
+            return data;
         }
 
         public void Import(Cue cue, string file)
         {
-            byte[] bytes;
-            using (var input = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read))
-            {
-                if (input.Length < 44 || input.Length > 4 * 1024 * 1024)
-                    throw new InvalidDataException("请选择 4 MB 以内的 PCM WAV。");
-                using (var r = new BinaryReader(input))
-                    bytes = r.ReadBytes((int)input.Length);
-            }
-
+            byte[] bytes = ReadWave(file);
             if (!ValidWave(bytes))
                 throw new InvalidDataException("需要 0–10 秒的单声道或立体声 PCM WAV（8 或 16 位）。");
             Stop();
@@ -216,41 +158,6 @@ namespace TwinShift
             return index == b.Length && rate > 0 && bytes > 0 && bytes % align == 0 && bytes <= rate * align * 10;
         }
 
-        async Task<string> Fetch(Cue cue, CancellationToken token)
-        {
-            string cached = CachedFile(cue);
-            if (File.Exists(cached) && new FileInfo(cached).Length <= Limit && Digest(File.ReadAllBytes(cached)) == cue.Sha256)
-                return cached;
-            using (var response = await client.GetAsync(cue.Url, HttpCompletionOption.ResponseHeadersRead, token))
-            {
-                response.EnsureSuccessStatusCode();
-                if (response.Content.Headers.ContentLength > Limit)
-                    throw new InvalidDataException("来源片段超过大小限制。");
-                if (response.Content.Headers.ContentType?.MediaType?.StartsWith("audio/", StringComparison.OrdinalIgnoreCase) != true)
-                    throw new InvalidDataException("来源未返回音频内容。");
-                using (var src = await response.Content.ReadAsStreamAsync())
-                using (var mem = new MemoryStream())
-                {
-                    byte[] chunk = new byte[16384];
-                    int n;
-                    while ((n = await src.ReadAsync(chunk, 0, chunk.Length, token)) > 0)
-                    {
-                        if (mem.Length + n > Limit)
-                            throw new InvalidDataException();
-                        mem.Write(chunk, 0, n);
-                    }
-
-                    byte[] data = mem.ToArray();
-                    token.ThrowIfCancellationRequested();
-                    if (Digest(data) != cue.Sha256)
-                        throw new InvalidDataException("来源音频已变化，请等待目录更新，或导入本地文件。");
-                    Directory.CreateDirectory(temporary);
-                    File.WriteAllBytes(cached, data);
-                    return cached;
-                }
-            }
-        }
-
         public async Task<bool> Play(string id)
         {
             Stop();
@@ -261,50 +168,43 @@ namespace TwinShift
                 return false;
             }
 
-            var request = new CancellationTokenSource(TimeSpan.FromSeconds(12));
+            var request = new CancellationTokenSource();
             pending = request;
             try
             {
-                string file;
-                trim = 1;
-                if (id == "attention")
-                    file = Files.Asset("attention.wav");
-                else
-                {
-                    if (!Clips.TryGetValue(id, out var cue))
-                        return false;
-                    if (HasLocal(cue))
-                        file = LocalFile(cue);
-                    else if (settings.Online)
-                    {
-                        trim = cue.Gain;
-                        file = await Fetch(cue, request.Token);
-                    }
-                    else
-                    {
-                        Notice?.Invoke("请在「原声」开启个人联机试听，或为此台词导入本地 WAV。");
-                        return false;
-                    }
-                }
-
-                if (mine != serial || request.IsCancellationRequested)
+                var token = request.Token;
+                request.CancelAfter(TimeSpan.FromSeconds(15));
+                Cue cue = null;
+                if (id != "attention" && !Clips.TryGetValue(id, out cue))
                     return false;
-                SetLevel();
-                player.Open(new Uri(file));
-                player.Play();
-                return true;
+                bool bundled = cue != null && !HasLocal(cue);
+                trim = bundled ? cue.Gain : 1;
+                using (var clip = await Task.Run(() =>
+                {
+                    byte[] data = bundled ? ReadBundled(cue) : ReadWave(cue == null ? Files.Asset("attention.wav") : LocalFile(cue));
+                    return VoiceOutput.Decode(data, !bundled, token);
+                }, token))
+                {
+                    token.ThrowIfCancellationRequested();
+                    SetLevel();
+                    await output.Play(clip, token, () => Started?.Invoke(id));
+                    return mine == serial;
+                }
             }
             catch (OperationCanceledException)
             {
                 if (mine == serial)
-                    Notice?.Invoke("取音超时，可以重试或使用本地 WAV。");
+                    Notice?.Invoke("播放超时，请检查默认输出设备。");
                 return false;
             }
             catch (Exception e)
             {
-                PlaybackError?.Invoke(e);
                 if (mine == serial)
-                    Notice?.Invoke(e is InvalidDataException && e.Message.StartsWith("来源") ? e.Message : e is HttpRequestException ? "无法从音频来源取得片段。请检查网络或代理，也可使用本地 WAV。" : "这段声音暂时无法播放，可以重试或使用本地 WAV。");
+                    Notice?.Invoke(e is InvalidDataException || e is InvalidOperationException ? e.Message :
+                        e is FileNotFoundException || e is DirectoryNotFoundException ? "找不到音频文件。请重新导入这句录音，或修复安装。" :
+                        e is UnauthorizedAccessException ? "无法读取这句录音。请检查文件访问权限。" :
+                        e is COMException ? "Windows 无法使用当前输出设备。请检查音量混合器或重新连接耳机。" :
+                        "播放未完成。请检查输出设备，或重新导入这句录音。");
                 return false;
             }
             finally
@@ -318,8 +218,6 @@ namespace TwinShift
         public void Dispose()
         {
             Stop();
-            client.Dispose();
-            ClearTemporary();
         }
     }
 }

@@ -1,15 +1,14 @@
 [
   {
     "Id": "yay",
-    "Speaker": "Neuro",
+    "Speaker": "neuro",
     "Line": "Yay!",
     "Translation": "耶！",
     "Slot": "测试通过",
     "Seconds": 0.82,
     "Gain": 0.611,
-    "Url": "https://minhtridotnet.github.io/neuro-sama-soundboard/Sounds/Neuro-sama%20Yay.mp3",
     "Source": "https://www.youtube.com/watch?v=UpWBjIvQLts&t=103s",
-    "Credit": "minhtridotnet 音板",
+    "Credit": "直播剪辑 · minhtridotnet 音板",
     "Sha256": "898b7102a404364138a34158aed2af3e9ae1b3fe2aabda4ce77e26b04a49cc30"
   },
   {
@@ -20,35 +19,32 @@
     "Slot": "测试通过",
     "Seconds": 2.31,
     "Gain": 0.764,
-    "Url": "https://storage.neurokaraoke.com/soundbites/Evil/e041741c-f74b-4ffd-ae3d-8d5b96abff15.mp3",
     "Source": "https://www.youtube.com/watch?v=dPp6tG1nbtQ&t=2987s",
-    "Credit": "NeuroKaraoke 社区剪辑",
+    "Credit": "直播剪辑 · NeuroKaraoke 社区剪辑",
     "Sha256": "a6fd9cdf67f4655017a7c99e9d5175c036defe0aeac426b1639660464e60cc04"
   },
   {
     "Id": "filtered",
-    "Speaker": "Neuro",
+    "Speaker": "neuro",
     "Line": "Filtered.",
     "Translation": "被过滤了。",
     "Slot": "拒绝命令后 · 手动",
     "Seconds": 1.32,
     "Gain": 0.813,
-    "Url": "https://storage.neurokaraoke.com/soundbites/Neuro/f42c7ea9-2e6e-40f8-b6c0-fc2ad41eaa07.mp3",
     "Source": "https://api.neurokaraoke.com/api/soundbites/f42c7ea9-2e6e-40f8-b6c0-fc2ad41eaa07",
-    "Credit": "NeuroKaraoke 社区剪辑",
+    "Credit": "直播剪辑 · NeuroKaraoke 社区剪辑",
     "Sha256": "ed8434bf84acde49b5170007be976bdd10b38b1ef389f397e31fe0c147b58ce1"
   },
   {
     "Id": "help",
-    "Speaker": "Neuro",
+    "Speaker": "neuro",
     "Line": "Someone tell Vedal there is a problem with my AI.",
     "Translation": "谁去告诉 Vedal，我的 AI 出问题了。",
     "Slot": "连接中断 · 手动",
     "Seconds": 3.2,
     "Gain": 0.689,
-    "Url": "https://minhtridotnet.github.io/neuro-sama-soundboard/Sounds/Neuro-sama%20Someone%20tell%20Vedal%20there%20is%20a%20problem%20with%20my%20AI.mp3",
     "Source": "https://www.youtube.com/watch?v=Gmr4WfHemTA",
-    "Credit": "minhtridotnet 音板",
+    "Credit": "直播剪辑 · minhtridotnet 音板",
     "Sha256": "99a78ce79201f1df1edd4bfcdb684a1ebe3de16f4533bf3f0386c48a974f11c5"
   },
   {
@@ -59,9 +55,8 @@
     "Slot": "测试失败",
     "Seconds": 1.18,
     "Gain": 0.922,
-    "Url": "https://storage.neurokaraoke.com/soundbites/Evil/Evil_aww_shucks.mp3",
     "Source": "https://api.neurokaraoke.com/api/soundbites/19d92cef-1456-4226-8640-7c974f76c233",
-    "Credit": "NeuroKaraoke 社区剪辑",
+    "Credit": "直播剪辑 · NeuroKaraoke 社区剪辑",
     "Sha256": "ee0f3372b8153bb617e63ac180e600a35e3d5194c20f643a15193933e41be577"
   },
   {
@@ -69,25 +64,23 @@
     "Speaker": "Evil",
     "Line": "Let me play some pipes to celebrate.",
     "Translation": "让我敲几下管子庆祝。",
-    "Slot": "夜班完成 · 管道庆功",
+    "Slot": "月之暗面 · 管道庆功",
     "Seconds": 3.32,
     "Gain": 0.617,
-    "Url": "https://storage.neurokaraoke.com/soundbites/Evil/257f3068-1759-4d6d-9013-d69ee4c7c107.mp3",
     "Source": "https://www.youtube.com/watch?v=hGtT4-MSzS0&t=1014s",
-    "Credit": "NeuroKaraoke 社区剪辑",
+    "Credit": "直播剪辑 · NeuroKaraoke 社区剪辑",
     "Sha256": "045f4cd08f3683d2a980d8cda626919b091be73a097f87cc3a3b089902fbdf4d"
   },
   {
     "Id": "tutel",
-    "Speaker": "Neuro",
+    "Speaker": "neuro",
     "Line": "Tutel loves you all!",
     "Translation": "龟龟爱你们！",
-    "Slot": "点侧栏小龟 · 手动",
+    "Slot": "控制台小龟 · 手动",
     "Seconds": 2,
     "Gain": 0.616,
-    "Url": "https://storage.neurokaraoke.com/soundbites/Neuro/a5b0b1b5-729c-4975-a826-cf3839536f16.mp3",
     "Source": "https://api.neurokaraoke.com/api/soundbites/a5b0b1b5-729c-4975-a826-cf3839536f16",
-    "Credit": "NeuroKaraoke 社区剪辑",
+    "Credit": "直播剪辑 · NeuroKaraoke 社区剪辑",
     "Sha256": "fae8e6564468ee0b5c272568100899efeca74149bc02a170185748b1d58ab419"
   },
   {
@@ -98,9 +91,8 @@
     "Slot": "测试通过后点龟 · 手动",
     "Seconds": 2.43,
     "Gain": 1,
-    "Url": "https://storage.neurokaraoke.com/soundbites/Vedal/Vedal_Good_job._Vedal_approved.mp3",
     "Source": "https://www.youtube.com/watch?v=ogNCHXO2oAI&t=31967s",
-    "Credit": "NeuroKaraoke 社区剪辑",
+    "Credit": "直播剪辑 · NeuroKaraoke 社区剪辑",
     "Sha256": "6b61fe706b691d3f51a025ee1b5c360e3a795cd39352b8300dd180fc9c9e7482"
   }
 ]

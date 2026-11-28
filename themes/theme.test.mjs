@@ -35,7 +35,7 @@ for (const { name, variant } of presets) {
     const { theme } = preset;
     const slot = variant === 'light' ? 'neo' : 'evo';
     const scene = JSON.parse(await readFile(new URL(`../scenes/${slot}.json`, import.meta.url), 'utf8'));
-    assert.equal(scene.name, `Vedal AI · ${slot === 'neo' ? 'Neo' : 'Evo'}`);
+    assert.equal(scene.name, `Vedal AI · ${slot === 'neo' ? 'neuro · 月之亮面' : 'Evil · 月之暗面'}`);
     assert.equal(theme.accent, scene.colors.accent.toLowerCase());
     assert.equal(theme.ink, scene.colors.text.toLowerCase());
     assert.ok(contrastRatio(scene.colors.muted, scene.colors.panel) >= 4.5);

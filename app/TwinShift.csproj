@@ -9,7 +9,9 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System.Net.Http" />
+    <PackageReference Include="NAudio.Wasapi" Version="[2.3.0]" />
+    <PackageReference Include="NLayer" Version="[3.0.1]" />
+    <PackageReference Include="WPF-UI" Version="[4.3.0]" />
     <Reference Include="System.Web.Extensions" />
     <Reference Include="System.Web" />
     <Compile Include="../shared/SignalBus.cs" Link="SignalBus.cs" />

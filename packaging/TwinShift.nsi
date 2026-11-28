@@ -2,7 +2,17 @@ Unicode True
 RequestExecutionLevel user
 ManifestDPIAware true
 Name "Twin Shift · Vedal AI"
-OutFile "${OUTPUT}\TwinShift-1.1.0-beta.1-Setup.exe"
+VIProductVersion "${NUMERIC_VERSION}"
+VIAddVersionKey "ProductName" "Vedal AI · Twin Shift"
+VIAddVersionKey "CompanyName" "Twin Shift contributors"
+VIAddVersionKey "FileDescription" "Vedal AI · Twin Shift Setup"
+VIAddVersionKey "FileVersion" "${RELEASE_VERSION}"
+VIAddVersionKey "ProductVersion" "${RELEASE_VERSION}"
+VIAddVersionKey "LegalCopyright" "Twin Shift contributors"
+OutFile "${OUTPUT}\TwinShift-${RELEASE_VERSION}-Setup.exe"
+!ifdef SIGN_PWSH
+  !uninstfinalize '"${SIGN_PWSH}" -NoLogo -NoProfile -NonInteractive -File "${SIGN_SCRIPT}" -Mode Sign -Path "%1"' = 0
+!endif
 InstallDir "$LOCALAPPDATA\Programs\TwinShift"
 Icon "${STAGE}\assets\twinshift.ico"
 SetCompressor /SOLID lzma
@@ -46,8 +56,11 @@ FunctionEnd
 Section
   SetOutPath "$INSTDIR"
   File /r "${STAGE}\*.*"
+  IfFileExists "$INSTDIR\twinshift.install" 0 +3
+  Delete "$INSTDIR\scenes\TwinShift-neo.zip"
+  Delete "$INSTDIR\scenes\TwinShift-evo.zip"
   FileOpen $0 "$INSTDIR\twinshift.install" w
-  FileWrite $0 "TwinShift 1.1.0-beta.1"
+  FileWrite $0 "TwinShift ${RELEASE_VERSION}"
   FileClose $0
   WriteUninstaller "$INSTDIR\Uninstall.exe"
   ${If} $Portable == 1
@@ -57,7 +70,7 @@ Section
     CreateShortcut "$SMPROGRAMS\Twin Shift.lnk" "$INSTDIR\TwinShift.exe"
     WriteRegStr HKCU "${UNKEY}" "DisplayName" "Twin Shift · Vedal AI"
     WriteRegStr HKCU "${UNKEY}" "Publisher" "Twin Shift contributors"
-    WriteRegStr HKCU "${UNKEY}" "DisplayVersion" "1.1.0-beta.1"
+    WriteRegStr HKCU "${UNKEY}" "DisplayVersion" "${RELEASE_VERSION}"
     WriteRegStr HKCU "${UNKEY}" "DisplayIcon" "$INSTDIR\TwinShift.exe"
     WriteRegStr HKCU "${UNKEY}" "UninstallString" '"$INSTDIR\Uninstall.exe"'
     WriteRegStr HKCU "${UNKEY}" "InstallLocation" "$INSTDIR"
@@ -74,9 +87,14 @@ Section "Uninstall"
     SetErrorLevel 3
     Abort
   ${EndIf}
-  IfFileExists "$INSTDIR\portable.install" +3 0
-  Delete "$SMPROGRAMS\Twin Shift.lnk"
-  DeleteRegKey HKCU "${UNKEY}"
+  ${IfNot} ${FileExists} "$INSTDIR\portable.install"
+    Delete "$SMPROGRAMS\Twin Shift.lnk"
+    DeleteRegKey HKCU "${UNKEY}"
+    ReadRegStr $0 HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Vedal AI Twin Shift"
+    ${If} $0 == '"$INSTDIR\TwinShift.exe" --tray'
+      DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "Vedal AI Twin Shift"
+    ${EndIf}
+  ${EndIf}
   !include "${OUTPUT}\uninstall-files.nsh"
   Delete "$INSTDIR\portable.install"
   Delete "$INSTDIR\twinshift.install"

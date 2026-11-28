@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web.Script.Serialization;
+using System.Windows.Media.Imaging;
 using Microsoft.Win32;
 
 namespace TwinShift
@@ -12,6 +13,19 @@ namespace TwinShift
     {
         public static readonly string Base = AppDomain.CurrentDomain.BaseDirectory;
         public static string Asset(string file) => Path.Combine(Base, "assets", file);
+        public static BitmapImage Image(string file)
+        {
+            using (var source = File.OpenRead(Asset(file)))
+            {
+                var image = new BitmapImage();
+                image.BeginInit();
+                image.CacheOption = BitmapCacheOption.OnLoad;
+                image.StreamSource = source;
+                image.EndInit();
+                image.Freeze();
+                return image;
+            }
+        }
         public static T ReadJson<T>(string file, int maxBytes)
         {
             using (var stream = new FileStream(file, FileMode.Open, FileAccess.Read, FileShare.Read | FileShare.Delete))
@@ -64,8 +78,8 @@ namespace TwinShift
         public int Volume { get; set; } = 60;
         public bool AutoVoice { get; set; }
         public bool Attention { get; set; }
-        public bool Online { get; set; }
         public bool Badge { get; set; }
+        public bool WindowScene { get; set; }
         public bool Muted { get; set; }
         public bool QuietMotion { get; set; }
         internal static string FileName => Path.Combine(SignalBus.Root, "settings.json");
@@ -122,7 +136,6 @@ namespace TwinShift
         public string Slot { get; set; }
         public double Seconds { get; set; }
         public double Gain { get; set; }
-        public string Url { get; set; }
         public string Sha256 { get; set; }
         public string Source { get; set; }
         public string Credit { get; set; }

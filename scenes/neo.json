@@ -1,6 +1,6 @@
 {
-  "schemaVersion": 1, "id": "twin-shift.neo", "name": "Vedal AI · Neo",
-  "brandSubtitle": "非官方同人主题", "tagline": "Neuro · Day Shift",
+  "schemaVersion": 1, "id": "twin-shift.neo", "name": "Vedal AI · neuro · 月之亮面",
+  "brandSubtitle": "非官方同人主题", "tagline": "neuro · 复古电台",
   "image": "background.jpg", "appearance": "light",
   "art": {"focusX": 0.73, "focusY": 0.49, "safeArea": "left", "taskMode": "ambient"},
   "colors": {

@@ -48,12 +48,13 @@ def package_files(slot):
         "theme.css": read_text_bytes(SCENES / "theme.css"),
         "background.jpg": load_background(ROOT / "assets" / f"{slot}.jpg"),
         "LICENSE.txt": read_text_bytes(ROOT / "assets" / "NOTICE.md") +
-                       b"\n\nTheme definition and CSS\n\n" + read_text_bytes(ROOT / "LICENSE"),
+                       b"\n\nTheme definition and CSS\n\n" + read_text_bytes(ROOT / "LICENSE") +
+                       b"\n\nDream Skin\n\n" + read_text_bytes(ROOT / "assets" / "DREAM-SKIN-LICENSE.txt"),
     }
     manifest = {
         "packageVersion": 1,
         "themeId": theme["id"],
-        "version": "1.1.0",
+        "version": "1.1.3",
         "skinApiVersion": 1,
         "minClientVersion": CLIENT_VERSION,
         "platforms": ["macos", "windows"],
@@ -76,7 +77,8 @@ def package_files(slot):
 
 def build(slot, scratch, validator):
     files = package_files(slot)
-    archive = scratch / f"TwinShift-{slot}.zip"
+    character = {"neo": "neuro", "evo": "Evil"}[slot]
+    archive = scratch / f"TwinShift-{character}.zip"
     # Fixed metadata and stored entries make the same inputs reproducible across platforms.
     with zipfile.ZipFile(archive, "w", compression=zipfile.ZIP_STORED) as out:
         for name, data in sorted(files.items()):

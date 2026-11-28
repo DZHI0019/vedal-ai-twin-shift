@@ -4,6 +4,8 @@
   border-right-width: 1px;
 }
 [data-ds-part="header"] {
+  background-color: var(--ds-theme-color-panel);
+  color: var(--ds-theme-color-text);
   border-bottom-color: var(--ds-theme-color-line);
   border-bottom-width: 1px;
   border-bottom-style: solid;
